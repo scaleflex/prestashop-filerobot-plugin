@@ -1,1 +1,2 @@
-# prestashop-filerobot-plugin
+# Filerobot by Scaleflex
+
