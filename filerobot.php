@@ -63,7 +63,8 @@ class Filerobot extends Module
     }
 
     public function hookDisplayAdminAfterHeader() {
-
+        $this->context->smarty->assign($this->getConfigs());
+        return $this->display(__FILE__, 'views/templates/hook/filerobot.tpl');
     }
 
     /**
@@ -81,7 +82,7 @@ class Filerobot extends Module
         $configs =  [
             'ciActivation'                 => (bool)   Configuration::get('FR_ACTIVATION'),
             'frToken'                      => (string) Configuration::get('FR_TOKEN'),
-            'frActivation'                 => (string) Configuration::get('FR_SEC_TEMPLATE'),
+            'frSecTemplate'                => (string) Configuration::get('FR_SEC_TEMPLATE'),
             'frUploadDir'                  => (string) Configuration::get('FR_UPLOAD_DIR'),
 
         ];
@@ -108,13 +109,13 @@ class Filerobot extends Module
             $frToken        =  Tools::getValue('FR_TOKEN');
             $frSecTemplate  =  Tools::getValue('FR_SEC_TEMPLATE');
 
-            if (empty($frToken)) {
+            if (empty($frToken) || empty($frSecTemplate)) {
                 Configuration::updateValue('FR_ACTIVATION', false);
                 if (Tools::getValue('FR_ACTIVATION')) {
                     $submitStatus = false;
                 }
             } else {
-
+                Configuration::updateValue('FR_ACTIVATION', Tools::getValue('FR_ACTIVATION'));
             }
 
             Configuration::updateValue('FR_TOKEN',          Tools::getValue('FR_TOKEN'));
