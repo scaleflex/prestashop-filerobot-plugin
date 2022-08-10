@@ -1,0 +1,18 @@
+{
+  "name": "scaleflex/prestashop-filerobot",
+  "authors": [
+    {
+      "name": "Tung Dang",
+      "email": "tung.dang@scaleflex.com"
+    }
+  ],
+  "autoload": {
+    "psr-4": {
+      "Scaleflex\\PrestashopFilerobot\\": "src/"
+    },
+    "config": {
+      "prepend-autoloader": false
+    },
+    "type": "prestashop-module"
+  }
+}

@@ -27,15 +27,22 @@
 <script type="text/javascript"
         src="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.105/filerobot-widget.min.js?func=proxy"></script>
 
-<button style="display: none" type="button" id="filerobot-modal-btn" class="btn  btn-primary"
-        data-toggle="modal" data-target="#filerobotModal" >
-</button>
-<div class="modal fade" id="filerobotModal" tabindex="-1"
-     role="dialog" aria-labelledby="Filerobot Modal" aria-hidden="true">
-    <div style="margin: 20px auto" class="modal-lg" role="document">
+
+<button type="button" class="btn btn-primary" style="display: none" id="filerobot-modal-btn" data-toggle="modal" data-target="#filerobotModal"></button>
+<div class="modal fade" id="filerobotModal" tabindex="-1" role="dialog" aria-labelledby="filerobotLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg"  role="document">
         <div class="modal-content">
-            <div id="modal-content" class="modal-body">
+            <div class="modal-header">
+                <h5 class="modal-title" id="filerobotLabel">Filerobot Media Asset Manager</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
                 <div id="filerobot-widget"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" id="filerobotModalClose" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
@@ -43,9 +50,9 @@
 <script>
     $(document).ready(function() {
 
-        // $('.filerobotmanager').on('click', function () {
-        //     $('#filerobot-modal-btn').trigger('click');
-        // });
+        $('.filerobotmanager').on('click', function () {
+            $('#filerobot-modal-btn').trigger('click');
+        });
 
 
         const container = '{$frToken|escape:'htmlall':'UTF-8'}';
@@ -106,15 +113,33 @@
                             height = url.searchParams.get("height");
                         }
 
-                        window.fileRobotActiveEditor.execCommand('mceInsertContent', false, '<div>' +
-                            '<img src="' + link + '" ' +
-                            ' width="' + width + '"' +
-                            ' height="' + height + '"' +
-                            ' alt="' + selected.file.meta.title + '" /> ' +
-                            '</div>');
+                        const lastPreviewItem = $('.dz-preview ').last()
+
+                        const html = '<div class="dz-preview dz-processing dz-image-preview dz-complete ui-sortable-handle">' +
+                                            '<div class="dz-image bg" style="background-image: url('+link+')"></div>' +
+                                            '<div class="dz-details">' +
+                                                '<div class="dz-size"><span data-dz-size=""></span></div>' +
+                                                '<div class="dz-filename"><span data-dz-name=""></span></div>' +
+                                           ' </div>' +
+                             '</div>';
+
+                        if (lastPreviewItem) {
+                            lastPreviewItem.after(html)
+                        } else {
+
+                        }
                     })
-                    window.fileRobotActiveEditor = undefined
-                    jQuery('#modal-content').modal('closeModal')
+                    jQuery('#filerobotModalClose').trigger('click');
+
+
+                    const dropZoneElem = $('#product-images-dropzone');
+                    const expanderElem = $('#product-images-container .dropzone-expander');
+
+                    const imageLength = dropZoneElem.find('.dz-preview:not(.filerobotmanager)').length;
+                    const countRows   = (imageLength + 1) / 5;
+                    const height      = Math.ceil(countRows) * 171
+                    jQuery('#product-images-dropzone').css('height', height + 'px')
+
                     files = []
                     return false
                 });
@@ -148,5 +173,4 @@
         line-height: 40px;
         text-align: center;
     }
-
 </style>

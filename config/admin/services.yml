@@ -1,0 +1,5 @@
+services:
+  ProductImageControllerOverride:
+    class: Scaleflex\PrestashopFilerobot\Controller\Admin\ProductImageController
+    decorates: PrestaShopBundle\Controller\Admin\ProductImageController
+    arguments: ['@ProductImageControllerOverride.inner']
