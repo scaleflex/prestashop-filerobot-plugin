@@ -3,3 +3,8 @@ services:
     class: Scaleflex\PrestashopFilerobot\Controller\Admin\ProductImageController
     decorates: PrestaShopBundle\Controller\Admin\ProductImageController
     arguments: ['@ProductImageControllerOverride.inner']
+
+  ProductDataProviderOverride:
+    class: Scaleflex\PrestashopFilerobot\Adapter\ProductDataProvider
+    decorates: prestashop.adapter.data_provider.product
+    arguments: ['@ProductDataProviderOverride.inner']

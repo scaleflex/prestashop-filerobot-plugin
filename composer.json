@@ -13,6 +13,10 @@
     "config": {
       "prepend-autoloader": false
     },
+    "classmap": [
+      "filerobot.php",
+      "classes/FilerobotImage.php"
+    ],
     "type": "prestashop-module"
   }
 }

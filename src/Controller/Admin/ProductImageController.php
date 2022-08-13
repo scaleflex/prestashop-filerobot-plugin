@@ -2,15 +2,20 @@
 
 namespace Scaleflex\PrestashopFilerobot\Controller\Admin;
 
+use FilerobotImage;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Validator\Constraints as Assert;
+use PrestaShopBundle\Controller\Admin\ProductImageController as BaseProductImageController;
 
-class ProductImageController
+class ProductImageController extends BaseProductImageController
 {
+    const TYPE_FILEROBOT = 'filerobot';
+
     /**
      * Manage upload for product image.
      *
@@ -22,147 +27,68 @@ class ProductImageController
     public function uploadImageAction($idProduct, Request $request)
     {
         $response = new JsonResponse();
-        $adminProductWrapper = $this->get('prestashop.adapter.admin.wrapper.product');
         $return_data = [];
 
         if ($idProduct == 0 || !$request->isXmlHttpRequest()) {
             return $response;
         }
 
-        $form = $this->createFormBuilder(null, ['csrf_protection' => false])
-            ->add('file', 'Symfony\Component\Form\Extension\Core\Type\FileType', [
-                'error_bubbling' => true,
-                'constraints' => [
-                    new Assert\NotNull(['message' => $this->trans('Please select a file', 'Admin.Catalog.Feature')]),
-                    new Assert\Image(['maxSize' => $this->configuration->get('PS_ATTACHMENT_MAXIMUM_SIZE') . 'M']),
-                ],
-            ])
-            ->getForm();
+       if ($request->get('type') && $request->get('type') === self::TYPE_FILEROBOT) {
+           // Save product image to database
+           $image = new FilerobotImage();
+           $image->id_product = (int) ($idProduct);
+           $image->position = \ImageCore::getHighestPosition($idProduct) + 1;
 
-        $form->handleRequest($request);
+           if (!\ImageCore::getCover($image->id_product)) {
+               $image->cover = 1;
+           } else {
+               $image->cover = 0;
+           }
 
-        if ($request->isMethod('POST')) {
-            if ($form->isValid()) {
-                $return_data = $adminProductWrapper->getInstance()->ajaxProcessaddProductImage($idProduct, 'form', false)[0];
-                $return_data = array_merge($return_data, [
-                    'url_update' => $this->generateUrl('admin_product_image_form', ['idImage' => $return_data['id']]),
-                    'url_delete' => $this->generateUrl('admin_product_image_delete', ['idImage' => $return_data['id']]),
-                ]);
-            } else {
-                $error_msg = [];
-                foreach ($form->getErrors() as $error) {
-                    $error_msg[] = $error->getMessage();
-                }
-                $return_data = ['message' => implode(' ', $error_msg)];
-                $response->setStatusCode(400);
-            }
-        }
+           $image->url = $request->get('link');
+           $image->save();
 
-        return $response->setData($return_data);
-    }
+           $return_data['id'] = $image->id;
+           $return_data['cover'] = $image->cover;
 
-    /**
-     * Update images positions.
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function updateImagePositionAction(Request $request)
-    {
-        $response = new JsonResponse();
-        $adminProductWrapper = $this->get('prestashop.adapter.admin.wrapper.product');
-        $json = $request->request->get('json');
+           $return_data = array_merge($return_data, [
+               'url_update' => $this->generateUrl('admin_product_image_form', ['idImage' => $return_data['id']]),
+               'url_delete' => $this->generateUrl('admin_product_image_delete', ['idImage' => $return_data['id']]),
+           ]);
 
-        if (!empty($json) && $request->isXmlHttpRequest()) {
-            $adminProductWrapper->ajaxProcessUpdateImagePosition(json_decode($json, true));
-        }
+            // Return type as Dropzone
+           return $response->setData($return_data);
+       } else {
+           $adminProductWrapper = $this->get('prestashop.adapter.admin.wrapper.product');
+           $form = $this->createFormBuilder(null, ['csrf_protection' => false])
+               ->add('file', 'Symfony\Component\Form\Extension\Core\Type\FileType', [
+                   'error_bubbling' => true,
+                   'constraints' => [
+                       new Assert\NotNull(['message' => $this->trans('Please select a file', 'Admin.Catalog.Feature')]),
+                       new Assert\Image(['maxSize' => $this->configuration->get('PS_ATTACHMENT_MAXIMUM_SIZE') . 'M']),
+                   ],
+               ])
+               ->getForm();
 
-        return $response;
-    }
+           $form->handleRequest($request);
 
-    /**
-     * Manage form image.
-     *
-     * @Template("@PrestaShop/Admin/ProductImage/form.html.twig")
-     *
-     * @param string|int $idImage
-     * @param Request $request
-     *
-     * @return array|JsonResponse|Response
-     */
-    public function formAction($idImage, Request $request)
-    {
-        $locales = $this->get('prestashop.adapter.legacy.context')->getLanguages();
-        $adminProductWrapper = $this->get('prestashop.adapter.admin.wrapper.product');
-        $productAdapter = $this->get('prestashop.adapter.data_provider.product');
-
-        if ($idImage == 0 || !$request->isXmlHttpRequest()) {
-            return new Response();
-        }
-
-        $image = $productAdapter->getImage((int) $idImage);
-
-        $form = $this->get('form.factory')->createNamedBuilder('form_image', FormType::class, $image, ['csrf_protection' => false])
-            ->add('legend', 'PrestaShopBundle\Form\Admin\Type\TranslateType', [
-                'type' => 'Symfony\Component\Form\Extension\Core\Type\TextareaType',
-                'options' => [],
-                'locales' => $locales,
-                'hideTabs' => true,
-                'label' => $this->trans('Caption', 'Admin.Catalog.Feature'),
-                'required' => false,
-            ])
-            ->add('cover', 'Symfony\Component\Form\Extension\Core\Type\CheckboxType', [
-                'label' => $this->trans('Cover image', 'Admin.Catalog.Feature'),
-                'required' => false,
-            ])
-            ->getForm();
-
-        $form->handleRequest($request);
-
-        if ($request->isMethod('POST')) {
-            $jsonResponse = new JsonResponse();
-
-            if ($form->isValid()) {
-                $jsonResponse->setData($adminProductWrapper->ajaxProcessUpdateImage($idImage, $form->getData()));
-            } else {
-                $error_msg = [];
-                foreach ($form->getErrors() as $error) {
-                    $error_msg[] = $error->getMessage();
-                }
-
-                $jsonResponse->setData(['message' => implode(' ', $error_msg)]);
-                $jsonResponse->setStatusCode(400);
-            }
-
-            return $jsonResponse;
-        }
-
-        return [
-            'image' => $image,
-            'form' => $form->createView(),
-        ];
-    }
-
-    /**
-     * Delete an image from its ID.
-     *
-     * @param int $idImage
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function deleteAction($idImage, Request $request)
-    {
-        $response = new JsonResponse();
-        $adminProductWrapper = $this->get('prestashop.adapter.admin.wrapper.product');
-
-        if (!$request->isXmlHttpRequest()) {
-            return $response;
-        }
-
-        $adminProductWrapper->getInstance()->ajaxProcessDeleteProductImage($idImage);
-
-        return $response;
+           if ($request->isMethod('POST')) {
+               if ($form->isValid()) {
+                   $return_data = $adminProductWrapper->getInstance()->ajaxProcessaddProductImage($idProduct, 'form', false)[0];
+                   $return_data = array_merge($return_data, [
+                       'url_update' => $this->generateUrl('admin_product_image_form', ['idImage' => $return_data['id']]),
+                       'url_delete' => $this->generateUrl('admin_product_image_delete', ['idImage' => $return_data['id']]),
+                   ]);
+               } else {
+                   $error_msg = [];
+                   foreach ($form->getErrors() as $error) {
+                       $error_msg[] = $error->getMessage();
+                   }
+                   $return_data = ['message' => implode(' ', $error_msg)];
+                   $response->setStatusCode(400);
+               }
+           }
+           return $response->setData($return_data);
+       }
     }
 }

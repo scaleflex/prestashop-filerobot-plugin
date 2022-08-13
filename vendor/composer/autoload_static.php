@@ -22,6 +22,8 @@ class ComposerStaticInitcd17b2c16c5cca8ff5c3387d9f1941c7
 
     public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
+        'Filerobot' => __DIR__ . '/../..' . '/filerobot.php',
+        'FilerobotImage' => __DIR__ . '/../..' . '/classes/FilerobotImage.php',
     );
 
     public static function getInitializer(ClassLoader $loader)

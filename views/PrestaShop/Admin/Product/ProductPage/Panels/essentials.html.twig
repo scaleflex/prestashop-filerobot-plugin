@@ -54,17 +54,22 @@
                                 </div>
                                 {% if images is defined %}
                                     {% if editable %}
-                                        <div class="dz-preview disabled openfilemanager">
+                                        <div class="dz-preview disabled filerobotmanager">
                                             <div><span>+</span></div>
                                         </div>
                                     {% endif %}
+
                                     {% for image in images %}
                                         <div class="dz-preview dz-processing dz-image-preview dz-complete ui-sortable-handle"
                                              data-id="{{ image.id }}"
                                              url-delete="{{ path('admin_product_image_delete', {'idImage': image.id}) }}"
                                              url-update="{{ path('admin_product_image_form', {'idImage': image.id}) }}"
                                         >
-                                            <div class="dz-image bg" style="background-image: url('{{ image.base_image_url }}-home_default.{{ image.format }}');"></div>
+                                            {% if image.url %}
+                                                <div class="dz-image bg" style="background-image: url('{{ image.url }}');"></div>
+                                            {% else %}
+                                                <div class="dz-image bg" style="background-image: url('{{ image.base_image_url }}-home_default.{{ image.format }}');"></div>
+                                            {% endif %}
                                             <div class="dz-details">
                                                 <div class="dz-size"><span data-dz-size=""></span></div>
                                                 <div class="dz-filename"><span data-dz-name=""></span></div>

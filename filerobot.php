@@ -29,6 +29,7 @@ if (!defined('_PS_VERSION_')) {
 }
 
 require_once __DIR__.'/vendor/autoload.php';
+require_once(_PS_MODULE_DIR_ . 'filerobot/classes/FilerobotImage.php');
 
 class Filerobot extends Module
 {
@@ -61,12 +62,23 @@ class Filerobot extends Module
     {
         return parent::install() &&
                 $this->initConfigs() &&
-                $this->registerHook('displayAdminAfterHeader');
+                $this->registerHook('displayAdminAfterHeader') &&
+                $this->registerHook('actionAdminControllerSetMedia');
     }
 
+    /**
+     * @return false|string
+     */
     public function hookDisplayAdminAfterHeader() {
         $this->context->smarty->assign($this->getConfigs());
         return $this->display(__FILE__, 'views/templates/hook/filerobot.tpl');
+    }
+
+    public function hookActionAdminControllerSetMedia(array $params)
+    {
+        if($this->getConfigs('frActivation')) {
+            $this->context->controller->addJS($this->_path . 'views/js/tinymce/filerobot.js');
+        }
     }
 
     /**
@@ -82,7 +94,7 @@ class Filerobot extends Module
     public function getConfigs($configName = null)
     {
         $configs =  [
-            'ciActivation'                 => (bool)   Configuration::get('FR_ACTIVATION'),
+            'frActivation'                 => (bool)   Configuration::get('FR_ACTIVATION'),
             'frToken'                      => (string) Configuration::get('FR_TOKEN'),
             'frSecTemplate'                => (string) Configuration::get('FR_SEC_TEMPLATE'),
             'frUploadDir'                  => (string) Configuration::get('FR_UPLOAD_DIR'),
@@ -95,8 +107,6 @@ class Filerobot extends Module
 
         return $configs;
     }
-
-
 
     /**
      * Admin Config Page
@@ -245,5 +255,26 @@ class Filerobot extends Module
                 Configuration::deleteByName('FR_TOKEN') &&
                 Configuration::deleteByName('FR_SEC_TEMPLATE') &&
                 Configuration::deleteByName('FR_UPLOAD_DIR');
+    }
+
+    /**
+     * Add new column to table images
+     */
+    private function sqlInstall()
+    {
+        $sqlCommand = "ALTER TABLE `" . _DB_PREFIX_ . "image` " .
+                      "ADD COLUMN  `url` TEXT DEFAULT NULL;";
+
+        return Db::getInstance()->execute($sqlCommand);
+    }
+
+
+    //==== Support Function ==== //
+    /**
+     * @return FilerobotImage
+     */
+    public static function getFilerobotImageInstance()
+    {
+        return new FilerobotImage();
     }
 }

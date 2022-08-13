@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<module>
+    <name>filerobot</name>
+    <displayName><![CDATA[Filerobot by Scaleflex]]></displayName>
+    <version><![CDATA[1.0.0]]></version>
+    <description><![CDATA[Filerobot stores, enrich, normalizes, resizes, optimizes and distributes your images rocket fast around the world.]]></description>
+    <author><![CDATA[Scaleflex]]></author>
+    <tab><![CDATA[other]]></tab>
+	<confirmUninstall><![CDATA[Are you sure you want to uninstall?]]></confirmUninstall>
+    <is_configurable>1</is_configurable>
+    <need_instance>0</need_instance>
+	<limited_countries></limited_countries>
+</module>

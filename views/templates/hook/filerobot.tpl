@@ -94,6 +94,9 @@
                 })
                 .use(Webcam)
                 .on('export', function (files, popupExportSuccessMsgFn, downloadFilesPackagedFn, downloadFileFn) {
+
+                    const uploadUrl = jQuery('#product-images-dropzone').attr('url-upload');
+
                     files.forEach((selected, key) => {
                         let link = selected.link;
 
@@ -113,34 +116,50 @@
                             height = url.searchParams.get("height");
                         }
 
-                        const lastPreviewItem = $('.dz-preview ').last()
-
-                        const html = '<div class="dz-preview dz-processing dz-image-preview dz-complete ui-sortable-handle">' +
-                                            '<div class="dz-image bg" style="background-image: url('+link+')"></div>' +
-                                            '<div class="dz-details">' +
-                                                '<div class="dz-size"><span data-dz-size=""></span></div>' +
-                                                '<div class="dz-filename"><span data-dz-name=""></span></div>' +
-                                           ' </div>' +
-                             '</div>';
-
-                        if (lastPreviewItem) {
-                            lastPreviewItem.after(html)
+                        if (window.fileRobotActiveEditor) {
+                            window.fileRobotActiveEditor.execCommand('mceInsertContent', false, '<div>' +
+                                '<img src="' + link + '" ' +
+                                ' width="' + width + '"' +
+                                ' height="' + height + '"' +
+                                ' alt="' + selected.file.meta.title + '" /> ' +
+                                '</div>');
                         } else {
+                            const lastPreviewItem = $('.dz-preview ').last()
 
+                            jQuery.post(uploadUrl, {
+                                'type': 'filerobot',
+                                'link': link
+                            }).then(function(response) {
+                                const html = '<div class="dz-preview dz-processing dz-image-preview dz-complete ui-sortable-handle"' +
+                                    'url-delete="'+response.url_delete+'" ' +
+                                    'url-update="'+response.url_update+'" ' +
+                                    'data-id="'+response.id+'" ' +
+                                    '>' +
+                                    '<div class="dz-image bg" style="background-image: url('+link+')"></div>' +
+                                    '<div class="dz-details">' +
+                                    '<div class="dz-size"><span data-dz-size=""></span></div>' +
+                                    '<div class="dz-filename"><span data-dz-name=""></span></div>' +
+                                    ' </div>' +
+                                    '</div>';
+                                lastPreviewItem.after(html)
+                            }).catch(function(error) {
+                                //TODO:: Need todo something
+                            });
                         }
                     })
                     jQuery('#filerobotModalClose').trigger('click');
 
+                    if (!window.fileRobotActiveEditor) {
+                        const dropZoneElem = $('#product-images-dropzone');
+                        const expanderElem = $('#product-images-container .dropzone-expander');
 
-                    const dropZoneElem = $('#product-images-dropzone');
-                    const expanderElem = $('#product-images-container .dropzone-expander');
-
-                    const imageLength = dropZoneElem.find('.dz-preview:not(.filerobotmanager)').length;
-                    const countRows   = (imageLength + 1) / 5;
-                    const height      = Math.ceil(countRows) * 171
-                    jQuery('#product-images-dropzone').css('height', height + 'px')
-
-                    files = []
+                        const imageLength = dropZoneElem.find('.dz-preview:not(.filerobotmanager)').length;
+                        const countRows   = (imageLength + 1) / 5;
+                        const height      = (Math.ceil(countRows) * 171);
+                        jQuery('#product-images-dropzone').css('height', height + 'px')
+                    } else {
+                        window.fileRobotActiveEditor = undefined;
+                    }
                     return false
                 });
         }
