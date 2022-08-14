@@ -8,3 +8,8 @@ services:
     class: Scaleflex\PrestashopFilerobot\Adapter\ProductDataProvider
     decorates: prestashop.adapter.data_provider.product
     arguments: ['@ProductDataProviderOverride.inner']
+
+  ImageManagerOverride:
+    class: Scaleflex\PrestashopFilerobot\Adapter\ImageManager
+    decorates: prestashop.adapter.image_manager
+    arguments: ['@prestashop.adapter.legacy.context']
