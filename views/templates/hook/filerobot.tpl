@@ -22,6 +22,7 @@
 *  @copyright Scaleflex
 *  @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
 *}
+
 <link rel="stylesheet" type="text/css"
       href="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.105/filerobot-widget.min.css?func=proxy"/>
 <script type="text/javascript"

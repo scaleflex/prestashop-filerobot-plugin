@@ -63,7 +63,56 @@ class Filerobot extends Module
         return parent::install() &&
                 $this->initConfigs() &&
                 $this->registerHook('displayAdminAfterHeader') &&
-                $this->registerHook('actionAdminControllerSetMedia');
+                $this->registerHook('actionAdminControllerSetMedia') &&
+                $this->registerHook('actionPresentProduct') &&
+                $this->registerHook('actionPresentProductListing');
+    }
+
+    /**
+     * @param $observerData
+     * @return void
+     * @throws PrestaShopDatabaseException
+     */
+    public function hookActionPresentProductListing($observerData)
+    {
+        $presentedProduct = $observerData['presentedProduct'];
+        $this->changeImagesIfFilerobot($presentedProduct);
+    }
+
+    /**
+     * @param $observerData
+     * @return void
+     * @throws PrestaShopDatabaseException
+     */
+    public function hookActionPresentProduct($observerData)
+    {
+        $presentedProduct = $observerData['presentedProduct'];
+        $this->changeImagesIfFilerobot($presentedProduct);
+    }
+
+    /**
+     * @param $presentedProduct
+     * @return void
+     * @throws PrestaShopDatabaseException
+     */
+    private function changeImagesIfFilerobot($presentedProduct)
+    {
+        if ($presentedProduct->cover) {
+            $imageRetriever = new \Scaleflex\PrestashopFilerobot\Adapter\FilerobotImageRetriever($this->context->link);
+            $image = $imageRetriever->getOneImage($presentedProduct->cover['id_image'], $this->context->language->id);
+            if(!empty($image)) {
+                $imageCover = $image[0];
+                $cover = $imageRetriever->getImage(new Product(), $imageCover['id_image'], $imageCover['url']);
+                $presentedProduct->cover = $cover;
+            }
+        }
+
+        if (!empty($presentedProduct->images)) {
+            $idProduct = $presentedProduct->id;
+            $imageRetriever = new \Scaleflex\PrestashopFilerobot\Adapter\FilerobotImageRetriever($this->context->link);
+            $images = $imageRetriever->getAllProductImages(['id_product' => $idProduct], $this->context->language);
+            $presentedProduct->images = $images;
+        }
     }
 
     /**
@@ -74,6 +123,10 @@ class Filerobot extends Module
         return $this->display(__FILE__, 'views/templates/hook/filerobot.tpl');
     }
 
+    /**
+     * @param array $params
+     * @return void
+     */
     public function hookActionAdminControllerSetMedia(array $params)
     {
         if($this->getConfigs('frActivation')) {
