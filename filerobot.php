@@ -62,6 +62,7 @@ class Filerobot extends Module
     {
         return parent::install() &&
                 $this->initConfigs() &&
+                $this->sqlInstall() &&
                 $this->registerHook('displayAdminAfterHeader') &&
                 $this->registerHook('actionAdminControllerSetMedia') &&
                 $this->registerHook('actionPresentProduct') &&
