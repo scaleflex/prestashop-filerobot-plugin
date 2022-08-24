@@ -5,7 +5,7 @@
 - Only support Product Media and TinyMCE default version(Without others TinyMCE Plugin modification)
 - Only support Prestashop from version 1.7.8.7
 
-## Download Cloudimage module
+## Download Filerobot module
 
 - Step 1: Download the latest version [Download Latest release of Module](https://github.com/scaleflex/prestashop-filerobot-plugin/releases)
 - Step 2: Unzip the file and change the folder name to "filerobot"
