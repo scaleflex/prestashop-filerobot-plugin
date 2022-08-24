@@ -3,8 +3,7 @@
     <name>filerobot</name>
     <displayName><![CDATA[Filerobot by Scaleflex]]></displayName>
     <version><![CDATA[1.0.0]]></version>
-    <description>
-        <![CDATA[Filerobot stores, enrich, normalizes, resizes, optimizes and distributes your images rocket fast around the world.]]></description>
+    <description><![CDATA[Filerobot stores, enrich, normalizes, resizes, optimizes and distributes your images rocket fast around the world.]]></description>
     <author><![CDATA[Scaleflex]]></author>
     <tab><![CDATA[front_office_features]]></tab>
     <confirmUninstall><![CDATA[Are you sure you want to uninstall?]]></confirmUninstall>

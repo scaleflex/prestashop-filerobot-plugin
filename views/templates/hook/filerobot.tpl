@@ -52,6 +52,7 @@
 </div>
 <script>
     $(document).ready(function () {
+        window.filerobot = undefined;
 
         $('.filerobotmanager').on('click', function () {
             $('#filerobot-modal-btn').trigger('click');
@@ -74,7 +75,7 @@
             const XHRUpload = Filerobot.XHRUpload;
             const ImageEditor = Filerobot.ImageEditor;
             const Webcam = Filerobot.Webcam;
-
+            window.filerobot = filerobot;
             filerobot
                 .use(Explorer, {
                     config: {

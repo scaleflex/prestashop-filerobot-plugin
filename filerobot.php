@@ -63,7 +63,6 @@ class Filerobot extends Module
             $this->initConfigs() &&
             $this->sqlInstall() &&
             $this->registerHook('displayAdminAfterHeader') &&
-            $this->registerHook('actionAdminControllerSetMedia') &&
             $this->registerHook('actionPresentProduct') &&
             $this->registerHook('actionPresentProductListing');
     }
@@ -120,18 +119,9 @@ class Filerobot extends Module
      */
     public function hookDisplayAdminAfterHeader()
     {
-        $this->context->smarty->assign($this->getConfigs());
-        return $this->display(__FILE__, 'views/templates/hook/filerobot.tpl');
-    }
-
-    /**
-     * @param array $params
-     * @return void
-     */
-    public function hookActionAdminControllerSetMedia(array $params)
-    {
         if ($this->getConfigs('frActivation')) {
-            $this->context->controller->addJS($this->_path . 'views/js/tinymce/filerobot.js');
+            $this->context->smarty->assign($this->getConfigs());
+            return $this->display(__FILE__, 'views/templates/hook/filerobot.tpl');
         }
     }
 

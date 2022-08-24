@@ -11,8 +11,7 @@
  */
 
 jQuery(document).ready(function () {
-
-    if (tinymce) {
+    if (tinymce && window.filerobot) {
         tinymce.PluginManager.add('filerobot', function (editor, url) {
             editor.addButton('filerobot', {
                 icon: 'image',

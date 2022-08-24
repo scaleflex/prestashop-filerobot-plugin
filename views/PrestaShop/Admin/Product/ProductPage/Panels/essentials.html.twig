@@ -44,9 +44,15 @@
                                 </div>
                                 {% if images is defined %}
                                     {% if editable %}
+                                        {% if frActivation %}
                                         <div class="dz-preview disabled filerobotmanager">
                                             <div><span>+</span></div>
                                         </div>
+                                        {% else %}
+                                        <div class="dz-preview disabled openfilemanager">
+                                            <div><span>+</span></div>
+                                        </div>
+                                        {% endif %}
                                     {% endif %}
 
                                     {% for image in images %}
