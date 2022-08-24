@@ -3,6 +3,7 @@
 ## Limitation
 
 - Only support Product Media and TinyMCE default version(Without others TinyMCE Plugin modification)
+- Only support Prestashop from version 1.7.8.7
 
 ## Download Cloudimage module
 
