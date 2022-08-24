@@ -55,6 +55,5 @@ class FilerobotImage extends \ImageCore
         $query['height'] = $height;
         $url['query'] = http_build_query($query);
         return $url['scheme'] . '://' . $url['host'] . $url['path'] . '?' . $url['query'];
-
     }
 }
