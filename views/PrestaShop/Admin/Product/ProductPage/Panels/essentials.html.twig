@@ -1,4 +1,4 @@
-{**
+{# **
 * Copyright since 2022 Scaleflex
 *
 * NOTICE OF LICENSE
@@ -10,7 +10,7 @@
 * @author    Scaleflex
 * @copyright Since 2022 Scaleflex
 * @license   LICENSE.txt
-*}
+* #}
 
 <div role="tabpanel" class="form-contenttab tab-pane active" id="step1">
     <div class="row">
@@ -35,11 +35,11 @@
                                 <div id="product-images-dropzone-error" class="text-danger"></div>
                                 <div class="dz-default dz-message openfilemanager">
                                     <i class="material-icons">add_a_photo</i><br/>
-                                    {{js_translatable['Drop images here']}}<br/>
-                                    <a>{{js_translatable['or select files']}}</a><br/>
+                                    {{ js_translatable['Drop images here'] }}<br/>
+                                    <a>{{ js_translatable['or select files'] }}</a><br/>
                                     <small>
-                                        {{js_translatable['files recommandations']}}<br/>
-                                        {{js_translatable['files recommandations2']}}
+                                        {{ js_translatable['files recommandations'] }}<br/>
+                                        {{ js_translatable['files recommandations2'] }}
                                     </small>
                                 </div>
                                 {% if images is defined %}
@@ -56,15 +56,18 @@
                                              url-update="{{ path('admin_product_image_form', {'idImage': image.id}) }}"
                                         >
                                             {% if image.url %}
-                                                <div class="dz-image bg" style="background-image: url('{{ image.url }}');"></div>
+                                                <div class="dz-image bg"
+                                                     style="background-image: url('{{ image.url }}');"></div>
                                             {% else %}
-                                                <div class="dz-image bg" style="background-image: url('{{ image.base_image_url }}-home_default.{{ image.format }}');"></div>
+                                                <div class="dz-image bg"
+                                                     style="background-image: url('{{ image.base_image_url }}-home_default.{{ image.format }}');"></div>
                                             {% endif %}
                                             <div class="dz-details">
                                                 <div class="dz-size"><span data-dz-size=""></span></div>
                                                 <div class="dz-filename"><span data-dz-name=""></span></div>
                                             </div>
-                                            <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress="" style="width: 100%;"></span></div>
+                                            <div class="dz-progress"><span class="dz-upload" data-dz-uploadprogress=""
+                                                                           style="width: 100%;"></span></div>
                                             <div class="dz-error-message"><span data-dz-errormessage=""></span></div>
                                             <div class="dz-success-mark"></div>
                                             <div class="dz-error-mark"></div>
@@ -116,7 +119,10 @@
                             </div>
                             <div class="row">
                                 <div class="col-md-4">
-                                    <button type="button" class="btn btn-outline-primary sensitive add" id="add_feature_button"><i class="material-icons">add_circle</i> {{ 'Add a feature'|trans({}, 'Admin.Catalog.Feature') }}</button>
+                                    <button type="button" class="btn btn-outline-primary sensitive add"
+                                            id="add_feature_button"><i
+                                                class="material-icons">add_circle</i> {{ 'Add a feature'|trans({}, 'Admin.Catalog.Feature') }}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -144,17 +150,19 @@
                                         <h2>
                                             {{ "Combinations"|trans({}, 'Admin.Catalog.Feature') }}
                                             <span class="help-box" data-toggle="popover"
-                                                  data-content="{{ "Combinations are the different variations of a product, with attributes like its size, weight or color taking different values. Does your product require combinations?"|trans({}, 'Admin.Catalog.Help') }}" ></span>
+                                                  data-content="{{ "Combinations are the different variations of a product, with attributes like its size, weight or color taking different values. Does your product require combinations?"|trans({}, 'Admin.Catalog.Help') }}"></span>
                                         </h2>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="show_variations" value="0" {% if not has_combinations %}checked="checked"{% endif %}>
+                                                <input type="radio" name="show_variations" value="0"
+                                                       {% if not has_combinations %}checked="checked"{% endif %}>
                                                 {{ "Simple product"|trans({}, 'Admin.Catalog.Feature') }}
                                             </label>
                                         </div>
                                         <div class="radio">
                                             <label>
-                                                <input type="radio" name="show_variations" value="1" {% if has_combinations %}checked="checked"{% endif %}>
+                                                <input type="radio" name="show_variations" value="1"
+                                                       {% if has_combinations %}checked="checked"{% endif %}>
                                                 {{ "Product with combinations"|trans({}, 'Admin.Catalog.Feature') }}
                                             </label>
                                             <div id="product_type_combinations_shortcut">
@@ -171,7 +179,7 @@
                                     <h2>
                                         {{ "Reference"|trans({}, 'Admin.Catalog.Feature') }}
                                         <span class="help-box" data-toggle="popover"
-                                              data-content="{{ "Your reference code for this product. Allowed special characters: .-_#\."|trans({}, 'Admin.Catalog.Help') }}" ></span>
+                                              data-content="{{ "Your reference code for this product. Allowed special characters: .-_#\."|trans({}, 'Admin.Catalog.Help') }}"></span>
                                     </h2>
                                     {{ form_errors(formReference) }}
                                     <div class="row">
@@ -186,7 +194,7 @@
                                         <h2>
                                             {{ "Quantity"|trans({}, 'Admin.Catalog.Feature') }}
                                             <span class="help-box" data-toggle="popover"
-                                                  data-content="{{ "How many products should be available for sale?"|trans({}, 'Admin.Catalog.Help') }}" ></span>
+                                                  data-content="{{ "How many products should be available for sale?"|trans({}, 'Admin.Catalog.Help') }}"></span>
                                         </h2>
                                         {{ form_errors(formQuantityShortcut) }}
                                         <div class="row">
@@ -205,7 +213,7 @@
                                     <h2>
                                         {{ "Price"|trans({}, 'Admin.Global') }}
                                         <span class="help-box" data-toggle="popover"
-                                              data-content="{{ "This is the retail price at which you intend to sell this product to your customers. The tax included price will change according to the tax rule you select."|trans({}, 'Admin.Catalog.Help') }}" ></span>
+                                              data-content="{{ "This is the retail price at which you intend to sell this product to your customers. The tax included price will change according to the tax rule you select."|trans({}, 'Admin.Catalog.Help') }}"></span>
                                     </h2>
                                     <div class="row">
                                         <div class="col-md-6">
@@ -228,8 +236,7 @@
                                                     'fieldData' : form.step2.id_tax_rules_group.vars.value
                                                 }
                                                 )
-                                            )
-                                            }}
+                                            ) }}
                                         </div>
                                         <div class="col-md-12">
                         <span class="small font-secondary">

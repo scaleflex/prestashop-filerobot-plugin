@@ -10,13 +10,13 @@
  *  @license   LICENSE.txt
  */
 
-jQuery(document).ready(function() {
+jQuery(document).ready(function () {
 
     if (tinymce) {
-        tinymce.PluginManager.add('filerobot', function(editor, url) {
+        tinymce.PluginManager.add('filerobot', function (editor, url) {
             editor.addButton('filerobot', {
                 icon: 'image',
-                onclick: function() {
+                onclick: function () {
                     window.fileRobotActiveEditor = editor;
                     jQuery("#filerobot-modal-btn").trigger('click')
                 }
@@ -56,7 +56,7 @@ jQuery(document).ready(function() {
 
             return {
                 getMetadata: function () {
-                    return  {
+                    return {
                         name: "Filerobot TinyMCE Plugin",
                         url: "https://scaleflex.com"
                     };

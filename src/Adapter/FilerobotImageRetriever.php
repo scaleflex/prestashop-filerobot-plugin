@@ -18,10 +18,9 @@
  *  versions in the future. If you wish to customize PrestaShop for your
  *  needs please refer to http://www.prestashop.com for more information.
  *
- *  @author 2022 Scaleflex
- *  @author Tung Dang <tung.dang@scaleflex.com>
- *  @copyright Scaleflex
- *  @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @author 2022 Scaleflex
+ * @copyright Scaleflex
+ * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  */
 
 namespace Scaleflex\PrestashopFilerobot\Adapter;
@@ -175,10 +174,10 @@ class FilerobotImageRetriever
             $imageFolderPath,
             $id_image . '.' . $ext,
         ]);
-        $generateHighDpiImages = (bool) Configuration::get('PS_HIGHT_DPI');
+        $generateHighDpiImages = (bool)Configuration::get('PS_HIGHT_DPI');
 
         foreach ($image_types as $image_type) {
-            if(!$filerobotUrl) {
+            if (!$filerobotUrl) {
                 $resizedImagePath = implode(DIRECTORY_SEPARATOR, [
                     $imageFolderPath,
                     $id_image . '-' . $image_type['name'] . '.' . $ext,
@@ -188,8 +187,8 @@ class FilerobotImageRetriever
                     ImageManager::resize(
                         $mainImagePath,
                         $resizedImagePath,
-                        (int) $image_type['width'],
-                        (int) $image_type['height']
+                        (int)$image_type['width'],
+                        (int)$image_type['height']
                     );
                 }
 
@@ -202,8 +201,8 @@ class FilerobotImageRetriever
                         ImageManager::resize(
                             $mainImagePath,
                             $resizedImagePathHighDpi,
-                            (int) $image_type['width'] * 2,
-                            (int) $image_type['height'] * 2
+                            (int)$image_type['width'] * 2,
+                            (int)$image_type['height'] * 2
                         );
                     }
                 }
@@ -219,8 +218,8 @@ class FilerobotImageRetriever
 
             $urls[$image_type['name']] = [
                 'url' => $url,
-                'width' => (int) $image_type['width'],
-                'height' => (int) $image_type['height'],
+                'width' => (int)$image_type['width'],
+                'height' => (int)$image_type['height'],
             ];
         }
 
@@ -299,8 +298,8 @@ class FilerobotImageRetriever
 
             $urls[$image_type['name']] = [
                 'url' => $url,
-                'width' => (int) $image_type['width'],
-                'height' => (int) $image_type['height'],
+                'width' => (int)$image_type['width'],
+                'height' => (int)$image_type['height'],
             ];
         }
 
@@ -338,8 +337,8 @@ class FilerobotImageRetriever
             SELECT image_shop.`cover`, i.`id_image`, il.`legend`, i.`position`, i.`url`
             FROM `' . _DB_PREFIX_ . 'image` i
             ' . Shop::addSqlAssociation('image', 'i') . '
-            LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) $id_lang . ')
-            WHERE i.`id_image` = ' . (int) $id_image
+            LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int)$id_lang . ')
+            WHERE i.`id_image` = ' . (int)$id_image
         );
     }
 
@@ -358,8 +357,8 @@ class FilerobotImageRetriever
             SELECT image_shop.`cover`, i.`id_image`, il.`legend`, i.`position`, i.`url`
             FROM `' . _DB_PREFIX_ . 'image` i
             ' . Shop::addSqlAssociation('image', 'i') . '
-            LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) $id_lang . ')
-            WHERE i.`id_product` = ' . (int) $id_product . '
+            LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int)$id_lang . ')
+            WHERE i.`id_product` = ' . (int)$id_product . '
             ORDER BY `position`'
         );
     }
@@ -378,7 +377,7 @@ class FilerobotImageRetriever
         $product_attributes = Db::getInstance()->executeS(
             'SELECT `id_product_attribute`
             FROM `' . _DB_PREFIX_ . 'product_attribute`
-            WHERE `id_product` = ' . (int) $id_product
+            WHERE `id_product` = ' . (int)$id_product
         );
 
         if (!$product_attributes) {
@@ -388,7 +387,7 @@ class FilerobotImageRetriever
         $ids = [];
 
         foreach ($product_attributes as $product_attribute) {
-            $ids[] = (int) $product_attribute['id_product_attribute'];
+            $ids[] = (int)$product_attribute['id_product_attribute'];
         }
 
         $result = Db::getInstance()->executeS(
@@ -397,7 +396,7 @@ class FilerobotImageRetriever
             FROM `' . _DB_PREFIX_ . 'product_attribute_image` pai
             LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il ON (il.`id_image` = pai.`id_image`)
             LEFT JOIN `' . _DB_PREFIX_ . 'image` i ON (i.`id_image` = pai.`id_image`)
-            WHERE pai.`id_product_attribute` IN (' . implode(', ', $ids) . ') AND il.`id_lang` = ' . (int) $id_lang . ' ORDER by i.`position`'
+            WHERE pai.`id_product_attribute` IN (' . implode(', ', $ids) . ') AND il.`id_lang` = ' . (int)$id_lang . ' ORDER by i.`position`'
         );
 
         if (!$result) {
@@ -426,12 +425,12 @@ class FilerobotImageRetriever
         if (!$context) {
             $context = Context::getContext();
         }
-        $cache_id = 'Product::getCover_' . (int) $id_product . '-' . (int) $context->shop->id;
+        $cache_id = 'Product::getCover_' . (int)$id_product . '-' . (int)$context->shop->id;
         if (!Cache::isStored($cache_id)) {
             $sql = 'SELECT image_shop.`id_image`
                     FROM `' . _DB_PREFIX_ . 'image` i
                     ' . Shop::addSqlAssociation('image', 'i') . '
-                    WHERE i.`id_product` = ' . (int) $id_product . '
+                    WHERE i.`id_product` = ' . (int)$id_product . '
                     AND image_shop.`cover` = 1';
             $result = Db::getInstance()->getRow($sql);
             Cache::store($cache_id, $result);

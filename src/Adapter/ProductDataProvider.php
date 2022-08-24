@@ -18,10 +18,9 @@
  *  versions in the future. If you wish to customize PrestaShop for your
  *  needs please refer to http://www.prestashop.com for more information.
  *
- *  @author 2022 Scaleflex
- *  @author Tung Dang <tung.dang@scaleflex.com>
- *  @copyright Scaleflex
- *  @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @author 2022 Scaleflex
+ * @copyright Scaleflex
+ * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  */
 
 namespace Scaleflex\PrestashopFilerobot\Adapter;
@@ -42,7 +41,7 @@ class ProductDataProvider extends BaseProductDataProvider
      */
     public function getImage($id_image)
     {
-        $imageData = new \FilerobotImage((int) $id_image);
+        $imageData = new \FilerobotImage((int)$id_image);
 
         return [
             'id' => $imageData->id,
@@ -52,7 +51,7 @@ class ProductDataProvider extends BaseProductDataProvider
             'legend' => $imageData->legend,
             'format' => $imageData->image_format,
             'base_image_url' => _THEME_PROD_DIR_ . $imageData->getImgPath(),
-            'url'   => $imageData->url
+            'url' => $imageData->url
         ];
     }
 }

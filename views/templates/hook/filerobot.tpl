@@ -18,7 +18,6 @@
 *  needs please refer to http://www.prestashop.com for more information.
 *
 *  @author 2022 Scaleflex
-*  @author Tung Dang <tung.dang@scaleflex.com>
 *  @copyright Scaleflex
 *  @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
 *}
@@ -29,9 +28,11 @@
         src="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.105/filerobot-widget.min.js?func=proxy"></script>
 
 
-<button type="button" class="btn btn-primary" style="display: none" id="filerobot-modal-btn" data-toggle="modal" data-target="#filerobotModal"></button>
-<div class="modal fade" id="filerobotModal" tabindex="-1" role="dialog" aria-labelledby="filerobotLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg"  role="document">
+<button type="button" class="btn btn-primary" style="display: none" id="filerobot-modal-btn" data-toggle="modal"
+        data-target="#filerobotModal"></button>
+<div class="modal fade" id="filerobotModal" tabindex="-1" role="dialog" aria-labelledby="filerobotLabel"
+     aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="filerobotLabel">Filerobot Media Asset Manager</h5>
@@ -43,13 +44,14 @@
                 <div id="filerobot-widget"></div>
             </div>
             <div class="modal-footer">
-                <button type="button" id="filerobotModalClose" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" id="filerobotModalClose" class="btn btn-secondary" data-dismiss="modal">Close
+                </button>
             </div>
         </div>
     </div>
 </div>
 <script>
-    $(document).ready(function() {
+    $(document).ready(function () {
 
         $('.filerobotmanager').on('click', function () {
             $('#filerobot-modal-btn').trigger('click');
@@ -130,20 +132,20 @@
                             jQuery.post(uploadUrl, {
                                 'type': 'filerobot',
                                 'link': link
-                            }).then(function(response) {
+                            }).then(function (response) {
                                 const html = '<div class="dz-preview dz-processing dz-image-preview dz-complete ui-sortable-handle"' +
-                                    'url-delete="'+response.url_delete+'" ' +
-                                    'url-update="'+response.url_update+'" ' +
-                                    'data-id="'+response.id+'" ' +
+                                    'url-delete="' + response.url_delete + '" ' +
+                                    'url-update="' + response.url_update + '" ' +
+                                    'data-id="' + response.id + '" ' +
                                     '>' +
-                                    '<div class="dz-image bg" style="background-image: url('+link+')"></div>' +
+                                    '<div class="dz-image bg" style="background-image: url(' + link + ')"></div>' +
                                     '<div class="dz-details">' +
                                     '<div class="dz-size"><span data-dz-size=""></span></div>' +
                                     '<div class="dz-filename"><span data-dz-name=""></span></div>' +
                                     ' </div>' +
                                     '</div>';
                                 lastPreviewItem.after(html)
-                            }).catch(function(error) {
+                            }).catch(function (error) {
                                 //TODO:: Need todo something
                             });
                         }
@@ -155,8 +157,8 @@
                         const expanderElem = $('#product-images-container .dropzone-expander');
 
                         const imageLength = dropZoneElem.find('.dz-preview:not(.filerobotmanager)').length;
-                        const countRows   = (imageLength + 1) / 5;
-                        const height      = (Math.ceil(countRows) * 171);
+                        const countRows = (imageLength + 1) / 5;
+                        const height = (Math.ceil(countRows) * 171);
                         jQuery('#product-images-dropzone').css('height', height + 'px')
                     } else {
                         window.fileRobotActiveEditor = undefined;

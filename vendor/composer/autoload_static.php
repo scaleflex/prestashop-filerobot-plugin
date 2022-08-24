@@ -6,21 +6,21 @@ namespace Composer\Autoload;
 
 class ComposerStaticInitcd17b2c16c5cca8ff5c3387d9f1941c7
 {
-    public static $prefixLengthsPsr4 = array (
-        'S' => 
-        array (
-            'Scaleflex\\PrestashopFilerobot\\' => 30,
-        ),
+    public static $prefixLengthsPsr4 = array(
+        'S' =>
+            array(
+                'Scaleflex\\PrestashopFilerobot\\' => 30,
+            ),
     );
 
-    public static $prefixDirsPsr4 = array (
-        'Scaleflex\\PrestashopFilerobot\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/src',
-        ),
+    public static $prefixDirsPsr4 = array(
+        'Scaleflex\\PrestashopFilerobot\\' =>
+            array(
+                0 => __DIR__ . '/../..' . '/src',
+            ),
     );
 
-    public static $classMap = array (
+    public static $classMap = array(
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
         'Filerobot' => __DIR__ . '/../..' . '/filerobot.php',
         'FilerobotImage' => __DIR__ . '/../..' . '/classes/FilerobotImage.php',

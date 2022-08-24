@@ -18,10 +18,9 @@
  *  versions in the future. If you wish to customize PrestaShop for your
  *  needs please refer to http://www.prestashop.com for more information.
  *
- *  @author 2022 Scaleflex
- *  @author Tung Dang <tung.dang@scaleflex.com>
- *  @copyright Scaleflex
- *  @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * @author 2022 Scaleflex
+ * @copyright Scaleflex
+ * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
  */
 
 class FilerobotImage extends \ImageCore
@@ -36,7 +35,10 @@ class FilerobotImage extends \ImageCore
         'primary' => 'id_image',
         'multilang' => true,
         'fields' => [
-            'id_product' => ['type' => self::TYPE_INT, 'shop' => 'both', 'validate' => 'isUnsignedId', 'required' => true],
+            'id_product' => ['type' => self::TYPE_INT,
+                'shop' => 'both',
+                'validate' => 'isUnsignedId',
+                'required' => true],
             'position' => ['type' => self::TYPE_INT, 'validate' => 'isUnsignedInt'],
             'cover' => ['type' => self::TYPE_BOOL, 'allow_null' => true, 'validate' => 'isBool', 'shop' => true],
             'legend' => ['type' => self::TYPE_STRING, 'lang' => true, 'validate' => 'isGenericName', 'size' => 128],
@@ -47,12 +49,12 @@ class FilerobotImage extends \ImageCore
 
     public static function genrateUrl($url, $width, $height)
     {
-        $url             = parse_url($url);
+        $url = parse_url($url);
         parse_str($url['query'], $query);
-        $query['width']  = $width;
+        $query['width'] = $width;
         $query['height'] = $height;
-        $url['query']    = http_build_query($query);
-        return  $url['scheme'].'://'.$url['host'].$url['path'].'?'.$url['query'];
+        $url['query'] = http_build_query($query);
+        return $url['scheme'] . '://' . $url['host'] . $url['path'] . '?' . $url['query'];
 
     }
 }
