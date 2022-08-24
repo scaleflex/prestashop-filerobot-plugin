@@ -40,7 +40,7 @@ class Filerobot extends Module
         $this->author = 'Scaleflex';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = [
-            'min' => '1.7',
+            'min' => '1.7.8.7',
             'max' => _PS_VERSION_,
         ];
         $this->bootstrap = true;
