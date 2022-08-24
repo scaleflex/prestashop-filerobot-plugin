@@ -316,10 +316,20 @@ class Filerobot extends Module
      */
     private function sqlInstall()
     {
-        $sqlCommand = "ALTER TABLE `" . _DB_PREFIX_ . "image` " .
-                      "ADD COLUMN  `url` TEXT DEFAULT NULL;";
+        $sql = 'DESCRIBE '._DB_PREFIX_.'image';
+        $columns = Db::getInstance()->executeS($sql);
+        $found = false;
+        foreach($columns as $col){
+            if($col['Field']=='url'){
+                $found = true;
+                break;
+            }
+        }
 
-        return Db::getInstance()->execute($sqlCommand);
+        if(!$found){
+            Db::getInstance()->execute('ALTER TABLE `'._DB_PREFIX_.'image'.'` ADD `url` text DEFAULT NULL');
+        }
+        return true;
     }
 
 
