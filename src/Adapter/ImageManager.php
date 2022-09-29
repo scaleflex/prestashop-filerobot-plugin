@@ -102,8 +102,8 @@ class ImageManager extends BaseImageManager
     private function getThumbnailTag($imageId, $imageType, $tableName, $imageDir)
     {
         $imagePath = $this->getImagePath($imageId, $imageType, $tableName, $imageDir);
-
-        if (str_contains($imagePath, 'filerobot')) {
+        $search = 'filerobot.com';
+        if (preg_match("/{$search}/i", $imagePath)) {
             return '<img src="' . $imagePath . '&width=45&height=45" />';
         }
 

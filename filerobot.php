@@ -96,10 +96,11 @@ class Filerobot extends Module
      */
     private function changeImagesIfFilerobot($presentedProduct)
     {
+
         if ($presentedProduct->cover) {
             $imageRetriever = new \Scaleflex\PrestashopFilerobot\Adapter\FilerobotImageRetriever($this->context->link);
             $image = $imageRetriever->getOneImage($presentedProduct->cover['id_image'], $this->context->language->id);
-            if (!empty($image)) {
+            if (!empty($image) && $image[0]['url'] !== null) {
                 $imageCover = $image[0];
                 $cover = $imageRetriever->getImage(new Product(), $imageCover['id_image'], $imageCover['url']);
                 $presentedProduct->cover = $cover;
