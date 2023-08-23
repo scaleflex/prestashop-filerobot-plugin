@@ -1,34 +1,46 @@
 <?php
 /**
- *  2022 Scaleflex
+ * MIT License
  *
- *  NOTICE OF LICENSE
+ * Copyright (c) 2022 Scaleflex
  *
- *  This source file is subject to the Academic Free License (AFL 3.0)
- *  that is bundled with this package in the file LICENSE.txt.
- *  It is also available through the world-wide-web at this URL:
- *  http://opensource.org/licenses/afl-3.0.php
- *  If you did not receive a copy of the license and are unable to
- *  obtain it through the world-wide-web, please send an email
- *  to license@prestashop.com so we can send you a copy immediately.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- *  DISCLAIMER
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- *  Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- *  versions in the future. If you wish to customize PrestaShop for your
- *  needs please refer to http://www.prestashop.com for more information.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
- * @author 2022 Scaleflex
- * @copyright Scaleflex
- * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to http://www.prestashop.com for more information.
+ *
+ *  @author   Scaleflex
+ *  @copyright 2022 Scaleflex
+ *  @license   LICENSE
+ *
+ * Don't forget to prefix your containers with your own identifier
+ * to avoid any conflicts with others containers.
  */
-
 if (!defined('_PS_VERSION_')) {
     exit;
 }
 
 require_once __DIR__ . '/vendor/autoload.php';
-require_once(_PS_MODULE_DIR_ . 'filerobot/classes/FilerobotImage.php');
+require_once _PS_MODULE_DIR_ . 'filerobot/classes/FilerobotImage.php';
 
 class Filerobot extends Module
 {
@@ -55,21 +67,24 @@ class Filerobot extends Module
 
     /**
      * Install the Module
+     *
      * @return bool
      */
     public function install()
     {
-        return parent::install() &&
-            $this->initConfigs() &&
-            $this->sqlInstall() &&
-            $this->registerHook('displayAdminAfterHeader') &&
-            $this->registerHook('actionPresentProduct') &&
-            $this->registerHook('actionPresentProductListing');
+        return parent::install()
+            && $this->initConfigs()
+            && $this->sqlInstall()
+            && $this->registerHook('displayAdminAfterHeader')
+            && $this->registerHook('actionPresentProduct')
+            && $this->registerHook('actionPresentProductListing');
     }
 
     /**
      * @param $observerData
+     *
      * @return void
+     *
      * @throws PrestaShopDatabaseException
      */
     public function hookActionPresentProductListing($observerData)
@@ -80,7 +95,9 @@ class Filerobot extends Module
 
     /**
      * @param $observerData
+     *
      * @return void
+     *
      * @throws PrestaShopDatabaseException
      */
     public function hookActionPresentProduct($observerData)
@@ -91,16 +108,17 @@ class Filerobot extends Module
 
     /**
      * @param $presentedProduct
+     *
      * @return void
+     *
      * @throws PrestaShopDatabaseException
      */
     private function changeImagesIfFilerobot($presentedProduct)
     {
-
         if ($presentedProduct->cover) {
             $imageRetriever = new \Scaleflex\PrestashopFilerobot\Adapter\FilerobotImageRetriever($this->context->link);
             $image = $imageRetriever->getOneImage($presentedProduct->cover['id_image'], $this->context->language->id);
-            if (!empty($image) && $image[0]['url'] !== null) {
+            if (!empty($image) && null !== $image[0]['url']) {
                 $imageCover = $image[0];
                 $cover = $imageRetriever->getImage(new Product(), $imageCover['id_image'], $imageCover['url']);
                 $presentedProduct->cover = $cover;
@@ -122,12 +140,14 @@ class Filerobot extends Module
     {
         if ($this->getConfigs('frActivation')) {
             $this->context->smarty->assign($this->getConfigs());
+
             return $this->display(__FILE__, 'views/templates/hook/filerobot.tpl');
         }
     }
 
     /**
      * Uninstall the application
+     *
      * @return bool
      */
     public function uninstall()
@@ -139,11 +159,10 @@ class Filerobot extends Module
     public function getConfigs($configName = null)
     {
         $configs = [
-            'frActivation' => (bool)Configuration::get('FR_ACTIVATION'),
-            'frToken' => (string)Configuration::get('FR_TOKEN'),
-            'frSecTemplate' => (string)Configuration::get('FR_SEC_TEMPLATE'),
-            'frUploadDir' => (string)Configuration::get('FR_UPLOAD_DIR'),
-
+            'frActivation' => (bool) Configuration::get('FR_ACTIVATION'),
+            'frToken' => (string) Configuration::get('FR_TOKEN'),
+            'frSecTemplate' => (string) Configuration::get('FR_SEC_TEMPLATE'),
+            'frUploadDir' => (string) Configuration::get('FR_UPLOAD_DIR'),
         ];
 
         if ($configName) {
@@ -155,6 +174,7 @@ class Filerobot extends Module
 
     /**
      * Admin Config Page
+     *
      * @return string
      */
     public function getContent()
@@ -188,14 +208,15 @@ class Filerobot extends Module
 
     /**
      * Build Admin Form
+     *
      * @return string
      */
     public function buildForm()
     {
-        $frActivation = (bool)Configuration::get('FR_ACTIVATION');
-        $frToken = (string)Configuration::get('FR_TOKEN');
-        $frSecTemplate = (string)Configuration::get('FR_SEC_TEMPLATE');
-        $frUploadDir = (string)Configuration::get('FR_UPLOAD_DIR');
+        $frActivation = (bool) Configuration::get('FR_ACTIVATION');
+        $frToken = (string) Configuration::get('FR_TOKEN');
+        $frSecTemplate = (string) Configuration::get('FR_SEC_TEMPLATE');
+        $frUploadDir = (string) Configuration::get('FR_UPLOAD_DIR');
 
         $form = [
             'form' => [
@@ -214,13 +235,13 @@ class Filerobot extends Module
                             [
                                 'id' => 'active_on',
                                 'value' => 1,
-                                'label' => $this->trans('Enabled', array(), 'Admin.Global')
+                                'label' => $this->trans('Enabled', [], 'Admin.Global'),
                             ],
                             [
                                 'id' => 'active_off',
                                 'value' => 0,
-                                'label' => $this->trans('Disabled', array(), 'Admin.Global')
-                            ]
+                                'label' => $this->trans('Disabled', [], 'Admin.Global'),
+                            ],
                         ],
                     ],
                     [
@@ -228,21 +249,21 @@ class Filerobot extends Module
                         'label' => $this->l('Token'),
                         'desc' => $this->l('Enter token for example fmpsaXXX'),
                         'name' => 'FR_TOKEN',
-                        'size' => 20
+                        'size' => 20,
                     ],
                     [
                         'type' => 'text',
                         'label' => $this->l('Security template identifier'),
                         'desc' => $this->l('Enter token for example: SECU_234233_XXXX'),
                         'name' => 'FR_SEC_TEMPLATE',
-                        'size' => 20
+                        'size' => 20,
                     ],
                     [
                         'type' => 'text',
                         'label' => $this->l('Filerobot upload directory'),
                         'desc' => $this->l('Default upload directory, the directory where assets are stored, default /prestashop'),
                         'name' => 'FR_UPLOAD_DIR',
-                        'size' => 20
+                        'size' => 20,
                     ],
                 ],
                 'submit' => [
@@ -260,7 +281,7 @@ class Filerobot extends Module
         $helper->submit_action = 'submit' . $this->name;
 
         // Default language
-        $helper->default_form_language = (int)Configuration::get('PS_LANG_DEFAULT');
+        $helper->default_form_language = (int) Configuration::get('PS_LANG_DEFAULT');
 
         $helper->fields_value['FR_ACTIVATION'] = $frActivation;
         $helper->fields_value['FR_TOKEN'] = $frToken;
@@ -280,26 +301,28 @@ class Filerobot extends Module
 
     /**
      * Init configs if install
+     *
      * @return bool
      */
     private function initConfigs()
     {
-        return Configuration::updateValue('FR_ACTIVATION', "0") &&
-            Configuration::updateValue('FR_TOKEN', "") &&
-            Configuration::updateValue('FR_SEC_TEMPLATE', "") &&
-            Configuration::updateValue('FR_UPLOAD_DIR', "/prestashop");
+        return Configuration::updateValue('FR_ACTIVATION', '0')
+            && Configuration::updateValue('FR_TOKEN', '')
+            && Configuration::updateValue('FR_SEC_TEMPLATE', '')
+            && Configuration::updateValue('FR_UPLOAD_DIR', '/prestashop');
     }
 
     /**
      * Delete config if uninstalled
+     *
      * @return bool
      */
     private function deleteConfigs()
     {
-        return Configuration::deleteByName('FR_ACTIVATION') &&
-            Configuration::deleteByName('FR_TOKEN') &&
-            Configuration::deleteByName('FR_SEC_TEMPLATE') &&
-            Configuration::deleteByName('FR_UPLOAD_DIR');
+        return Configuration::deleteByName('FR_ACTIVATION')
+            && Configuration::deleteByName('FR_TOKEN')
+            && Configuration::deleteByName('FR_SEC_TEMPLATE')
+            && Configuration::deleteByName('FR_UPLOAD_DIR');
     }
 
     /**
@@ -311,20 +334,20 @@ class Filerobot extends Module
         $columns = Db::getInstance()->executeS($sql);
         $found = false;
         foreach ($columns as $col) {
-            if ($col['Field'] == 'url') {
+            if ('url' == $col['Field']) {
                 $found = true;
                 break;
             }
         }
 
         if (!$found) {
-            Db::getInstance()->execute('ALTER TABLE `' . _DB_PREFIX_ . 'image' . '` ADD `url` text DEFAULT NULL');
+            Db::getInstance()->execute('ALTER TABLE `' . _DB_PREFIX_ . 'image` ADD `url` text DEFAULT NULL');
         }
+
         return true;
     }
 
-
-    //==== Support Function ==== //
+    // ==== Support Function ==== //
 
     /**
      * @return FilerobotImage

@@ -1,74 +1,74 @@
 <?php
 /**
- *  2022 Scaleflex
+ * MIT License
  *
- *  NOTICE OF LICENSE
+ * Copyright (c) 2022 Scaleflex
  *
- *  This source file is subject to the Academic Free License (AFL 3.0)
- *  that is bundled with this package in the file LICENSE.txt.
- *  It is also available through the world-wide-web at this URL:
- *  http://opensource.org/licenses/afl-3.0.php
- *  If you did not receive a copy of the license and are unable to
- *  obtain it through the world-wide-web, please send an email
- *  to license@prestashop.com so we can send you a copy immediately.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- *  DISCLAIMER
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- *  Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- *  versions in the future. If you wish to customize PrestaShop for your
- *  needs please refer to http://www.prestashop.com for more information.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
- * @author 2022 Scaleflex
- * @copyright Scaleflex
- * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to http://www.prestashop.com for more information.
+ *
+ *  @author   Scaleflex
+ *  @copyright 2022 Scaleflex
+ *  @license   LICENSE
+ *
+ * Don't forget to prefix your containers with your own identifier
+ * to avoid any conflicts with others containers.
  */
 
 namespace Scaleflex\PrestashopFilerobot\Adapter;
 
-use Category;
-use Configuration;
 use Image;
-use ImageManager;
-use ImageType;
 use Language;
-use Link;
-use PrestaShopDatabaseException;
 use Product;
-use Store;
-use Shop;
-use Db;
-use Combination;
-use Context;
-use Cache;
 
 class FilerobotImageRetriever
 {
     /**
-     * @var Link
+     * @var \Link
      */
     private $link;
 
-    public function __construct(Link $link)
+    public function __construct(\Link $link)
     {
         $this->link = $link;
     }
 
     /**
      * @param array $product
-     * @param Language $language
+     * @param \Language $language
      *
      * @return array
      */
-    public function getAllProductImages(array $product, Language $language)
+    public function getAllProductImages(array $product, \Language $language)
     {
-        $productInstance = new Product(
+        $productInstance = new \Product(
             $product['id_product'],
             false,
             $language->id
         );
 
         $images = $this->getImages($productInstance->id, $language->id);
-
 
         if (empty($images)) {
             return [];
@@ -110,11 +110,11 @@ class FilerobotImageRetriever
 
     /**
      * @param array $product
-     * @param Language $language
+     * @param \Language $language
      *
      * @return array
      */
-    public function getProductImages(array $product, Language $language)
+    public function getProductImages(array $product, \Language $language)
     {
         $images = $this->getAllProductImages($product, $language);
 
@@ -131,12 +131,12 @@ class FilerobotImageRetriever
     }
 
     /**
-     * @param Product|Store|Category $object
+     * @param \Product|\Store|\Category $object
      * @param int $id_image
      *
      * @return array|null
      *
-     * @throws PrestaShopDatabaseException
+     * @throws \PrestaShopDatabaseException
      */
     public function getImage($object, $id_image, $filerobotUrl)
     {
@@ -144,15 +144,15 @@ class FilerobotImageRetriever
             return null;
         }
 
-        if (get_class($object) === 'Product') {
+        if ('Product' === $object::class) {
             $type = 'products';
             $getImageURL = 'getImageLink';
             $root = _PS_PROD_IMG_DIR_;
             $imageFolderPath = implode(DIRECTORY_SEPARATOR, [
                 rtrim($root, DIRECTORY_SEPARATOR),
-                rtrim(Image::getImgFolderStatic($id_image), DIRECTORY_SEPARATOR),
+                rtrim(\Image::getImgFolderStatic($id_image), DIRECTORY_SEPARATOR),
             ]);
-        } elseif (get_class($object) === 'Store') {
+        } elseif ('Store' === $object::class) {
             $type = 'stores';
             $getImageURL = 'getStoreImageLink';
             $root = _PS_STORE_IMG_DIR_;
@@ -165,16 +165,16 @@ class FilerobotImageRetriever
         }
 
         $urls = [];
-        $image_types = ImageType::getImagesTypes($type, true);
+        $image_types = \ImageType::getImagesTypes($type, true);
 
         $extPath = $imageFolderPath . DIRECTORY_SEPARATOR . 'fileType';
-        $ext = @file_get_contents($extPath) ?: 'jpg';
+        $ext = Tools::file_get_contents($extPath) ?: 'jpg';
 
         $mainImagePath = implode(DIRECTORY_SEPARATOR, [
             $imageFolderPath,
             $id_image . '.' . $ext,
         ]);
-        $generateHighDpiImages = (bool)Configuration::get('PS_HIGHT_DPI');
+        $generateHighDpiImages = (bool) \Configuration::get('PS_HIGHT_DPI');
 
         foreach ($image_types as $image_type) {
             if (!$filerobotUrl) {
@@ -184,11 +184,11 @@ class FilerobotImageRetriever
                 ]);
 
                 if (!file_exists($resizedImagePath)) {
-                    ImageManager::resize(
+                    \ImageManager::resize(
                         $mainImagePath,
                         $resizedImagePath,
-                        (int)$image_type['width'],
-                        (int)$image_type['height']
+                        (int) $image_type['width'],
+                        (int) $image_type['height']
                     );
                 }
 
@@ -198,11 +198,11 @@ class FilerobotImageRetriever
                         $id_image . '-' . $image_type['name'] . '2x.' . $ext,
                     ]);
                     if (!file_exists($resizedImagePathHighDpi)) {
-                        ImageManager::resize(
+                        \ImageManager::resize(
                             $mainImagePath,
                             $resizedImagePathHighDpi,
-                            (int)$image_type['width'] * 2,
-                            (int)$image_type['height'] * 2
+                            (int) $image_type['width'] * 2,
+                            (int) $image_type['height'] * 2
                         );
                     }
                 }
@@ -218,8 +218,8 @@ class FilerobotImageRetriever
 
             $urls[$image_type['name']] = [
                 'url' => $url,
-                'width' => (int)$image_type['width'],
-                'height' => (int)$image_type['height'],
+                'width' => (int) $image_type['width'],
+                'height' => (int) $image_type['height'],
             ];
         }
 
@@ -277,17 +277,17 @@ class FilerobotImageRetriever
     }
 
     /**
-     * @param Language $language
+     * @param \Language $language
      *
      * @return array
      *
-     * @throws PrestaShopDatabaseException
+     * @throws \PrestaShopDatabaseException
      */
-    public function getNoPictureImage(Language $language)
+    public function getNoPictureImage(\Language $language)
     {
         $urls = [];
         $type = 'products';
-        $image_types = ImageType::getImagesTypes($type, true);
+        $image_types = \ImageType::getImagesTypes($type, true);
 
         foreach ($image_types as $image_type) {
             $url = $this->link->getImageLink(
@@ -298,8 +298,8 @@ class FilerobotImageRetriever
 
             $urls[$image_type['name']] = [
                 'url' => $url,
-                'width' => (int)$image_type['width'],
-                'height' => (int)$image_type['height'],
+                'width' => (int) $image_type['width'],
+                'height' => (int) $image_type['height'],
             ];
         }
 
@@ -326,19 +326,19 @@ class FilerobotImageRetriever
      * Get product images and legends.
      *
      * @param int $id_lang Language identifier
-     * @param Context|null $context
+     * @param \Context|null $context
      *
      * @return array Product images and legends
      */
     public function getOneImage($id_image, $id_lang)
     {
-        return Db::getInstance()->executeS(
+        return \Db::getInstance()->executeS(
             '
             SELECT image_shop.`cover`, i.`id_image`, il.`legend`, i.`position`, i.`url`
             FROM `' . _DB_PREFIX_ . 'image` i
-            ' . Shop::addSqlAssociation('image', 'i') . '
-            LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int)$id_lang . ')
-            WHERE i.`id_image` = ' . (int)$id_image
+            ' . \Shop::addSqlAssociation('image', 'i') . '
+            LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) $id_lang . ')
+            WHERE i.`id_image` = ' . (int) $id_image
         );
     }
 
@@ -346,19 +346,19 @@ class FilerobotImageRetriever
      * Get product images and legends.
      *
      * @param int $id_lang Language identifier
-     * @param Context|null $context
+     * @param \Context|null $context
      *
      * @return array Product images and legends
      */
-    public function getImages($id_product, $id_lang, Context $context = null)
+    public function getImages($id_product, $id_lang, \Context $context = null)
     {
-        return Db::getInstance()->executeS(
+        return \Db::getInstance()->executeS(
             '
             SELECT image_shop.`cover`, i.`id_image`, il.`legend`, i.`position`, i.`url`
             FROM `' . _DB_PREFIX_ . 'image` i
-            ' . Shop::addSqlAssociation('image', 'i') . '
-            LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int)$id_lang . ')
-            WHERE i.`id_product` = ' . (int)$id_product . '
+            ' . \Shop::addSqlAssociation('image', 'i') . '
+            LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il ON (i.`id_image` = il.`id_image` AND il.`id_lang` = ' . (int) $id_lang . ')
+            WHERE i.`id_product` = ' . (int) $id_product . '
             ORDER BY `position`'
         );
     }
@@ -370,14 +370,14 @@ class FilerobotImageRetriever
      */
     public function getCombinationImages($id_product, $id_lang)
     {
-        if (!Combination::isFeatureActive()) {
+        if (!\Combination::isFeatureActive()) {
             return false;
         }
 
-        $product_attributes = Db::getInstance()->executeS(
+        $product_attributes = \Db::getInstance()->executeS(
             'SELECT `id_product_attribute`
             FROM `' . _DB_PREFIX_ . 'product_attribute`
-            WHERE `id_product` = ' . (int)$id_product
+            WHERE `id_product` = ' . (int) $id_product
         );
 
         if (!$product_attributes) {
@@ -387,16 +387,16 @@ class FilerobotImageRetriever
         $ids = [];
 
         foreach ($product_attributes as $product_attribute) {
-            $ids[] = (int)$product_attribute['id_product_attribute'];
+            $ids[] = (int) $product_attribute['id_product_attribute'];
         }
 
-        $result = Db::getInstance()->executeS(
+        $result = \Db::getInstance()->executeS(
             '
             SELECT pai.`id_image`, pai.`id_product_attribute`, il.`legend`
             FROM `' . _DB_PREFIX_ . 'product_attribute_image` pai
             LEFT JOIN `' . _DB_PREFIX_ . 'image_lang` il ON (il.`id_image` = pai.`id_image`)
             LEFT JOIN `' . _DB_PREFIX_ . 'image` i ON (i.`id_image` = pai.`id_image`)
-            WHERE pai.`id_product_attribute` IN (' . implode(', ', $ids) . ') AND il.`id_lang` = ' . (int)$id_lang . ' ORDER by i.`position`'
+            WHERE pai.`id_product_attribute` IN (' . implode(', ', $ids) . ') AND il.`id_lang` = ' . (int) $id_lang . ' ORDER by i.`position`'
         );
 
         if (!$result) {
@@ -416,28 +416,28 @@ class FilerobotImageRetriever
      * Get product cover image.
      *
      * @param int $id_product Product identifier
-     * @param Context|null $context
+     * @param \Context|null $context
      *
      * @return array Product cover image
      */
-    public function getCover($id_product, Context $context = null)
+    public function getCover($id_product, \Context $context = null)
     {
         if (!$context) {
-            $context = Context::getContext();
+            $context = \Context::getContext();
         }
-        $cache_id = 'Product::getCover_' . (int)$id_product . '-' . (int)$context->shop->id;
-        if (!Cache::isStored($cache_id)) {
+        $cache_id = 'Product::getCover_' . (int) $id_product . '-' . (int) $context->shop->id;
+        if (!\Cache::isStored($cache_id)) {
             $sql = 'SELECT image_shop.`id_image`
                     FROM `' . _DB_PREFIX_ . 'image` i
-                    ' . Shop::addSqlAssociation('image', 'i') . '
-                    WHERE i.`id_product` = ' . (int)$id_product . '
+                    ' . \Shop::addSqlAssociation('image', 'i') . '
+                    WHERE i.`id_product` = ' . (int) $id_product . '
                     AND image_shop.`cover` = 1';
-            $result = Db::getInstance()->getRow($sql);
-            Cache::store($cache_id, $result);
+            $result = \Db::getInstance()->getRow($sql);
+            \Cache::store($cache_id, $result);
 
             return $result;
         }
 
-        return Cache::retrieve($cache_id);
+        return \Cache::retrieve($cache_id);
     }
 }

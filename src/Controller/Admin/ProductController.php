@@ -1,31 +1,43 @@
 <?php
 /**
- *  2022 Scaleflex
+ * MIT License
  *
- *  NOTICE OF LICENSE
+ * Copyright (c) 2022 Scaleflex
  *
- *  This source file is subject to the Academic Free License (AFL 3.0)
- *  that is bundled with this package in the file LICENSE.txt.
- *  It is also available through the world-wide-web at this URL:
- *  http://opensource.org/licenses/afl-3.0.php
- *  If you did not receive a copy of the license and are unable to
- *  obtain it through the world-wide-web, please send an email
- *  to license@prestashop.com so we can send you a copy immediately.
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
  *
- *  DISCLAIMER
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
  *
- *  Do not edit or add to this file if you wish to upgrade PrestaShop to newer
- *  versions in the future. If you wish to customize PrestaShop for your
- *  needs please refer to http://www.prestashop.com for more information.
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
  *
- * @author 2022 Scaleflex
- * @copyright Scaleflex
- * @license http://opensource.org/licenses/osl-3.0.php Open Software License (OSL 3.0)
+ * DISCLAIMER
+ *
+ * Do not edit or add to this file if you wish to upgrade PrestaShop to newer
+ * versions in the future. If you wish to customize PrestaShop for your
+ * needs please refer to http://www.prestashop.com for more information.
+ *
+ *  @author   Scaleflex
+ *  @copyright 2022 Scaleflex
+ *  @license   LICENSE
+ *
+ * Don't forget to prefix your containers with your own identifier
+ * to avoid any conflicts with others containers.
  */
 
 namespace Scaleflex\PrestashopFilerobot\Controller\Admin;
 
-use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use Category;
 use Exception;
 use PrestaShop\PrestaShop\Adapter\Product\ListParametersUpdater;
@@ -39,6 +51,7 @@ use PrestaShop\PrestaShop\Core\Domain\Product\Query\GetProductIsEnabled;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
 use PrestaShop\PrestaShop\Core\Hook\HookDispatcher;
 use PrestaShopBundle\Component\CsvResponse;
+use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Entity\AdminFilter;
 use PrestaShopBundle\Entity\Repository\AttributeRepository;
 use PrestaShopBundle\Exception\UpdateProductException;
@@ -69,8 +82,6 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Tools;
-use Configuration;
 
 /**
  * Admin controller for the Product pages using the Symfony architecture:
@@ -149,8 +160,8 @@ class ProductController extends FrameworkBundleAdminController
         $orderBy = $listParameters['orderBy'];
         $sortOrder = $listParameters['sortOrder'];
 
-        //The product provider performs the same merge internally, so we do the same so that the displayed filters are
-        //consistent with the request ones
+        // The product provider performs the same merge internally, so we do the same so that the displayed filters are
+        // consistent with the request ones
         $combinedFilterParameters = array_replace($persistedFilterParameters, $request->request->all());
 
         $toolbarButtons = $this->getToolbarButtons();
@@ -167,9 +178,9 @@ class ProductController extends FrameworkBundleAdminController
 
         $hasCategoryFilter = $productProvider->isCategoryFiltered();
         $hasColumnFilter = $productProvider->isColumnFiltered();
-        $totalFilteredProductCount = (count($products) > 0) ? $products[0]['total'] : 0;
+        $totalFilteredProductCount = (0 < count($products)) ? $products[0]['total'] : 0;
         // Alternative layout for empty list
-        if ((!$hasCategoryFilter && !$hasColumnFilter && $totalFilteredProductCount === 0)
+        if ((!$hasCategoryFilter && !$hasColumnFilter && 0 === $totalFilteredProductCount)
             || ($totalProductCount = $productProvider->countAllProducts()) === 0
         ) {
             // no filter, total filtered == 0, and then total count == 0 too.
@@ -210,10 +221,10 @@ class ProductController extends FrameworkBundleAdminController
         }
 
         $categoriesFormView = $categoriesForm->createView();
-        $selectedCategory = !empty($combinedFilterParameters['filter_category']) ? new Category($combinedFilterParameters['filter_category']) : null;
+        $selectedCategory = !empty($combinedFilterParameters['filter_category']) ? new \Category($combinedFilterParameters['filter_category']) : null;
 
-        //Drag and drop is ONLY activated when EXPLICITLY requested by the user
-        //Meaning a category is selected and the user clicks on REORDER button
+        // Drag and drop is ONLY activated when EXPLICITLY requested by the user
+        // Meaning a category is selected and the user clicks on REORDER button
         $activateDragAndDrop = 'position_ordering' === $orderBy && $hasCategoryFilter;
 
         // Template vars injection
@@ -244,7 +255,7 @@ class ProductController extends FrameworkBundleAdminController
                 'is_shop_context' => $this->get('prestashop.adapter.shop.context')->isShopContext(),
                 'permission_error' => $permissionError,
                 'layoutTitle' => $this->trans('Products', 'Admin.Global'),
-                'frActivation' => (bool)Configuration::get('FR_ACTIVATION')
+                'frActivation' => (bool) \Configuration::get('FR_ACTIVATION'),
             ]
         );
     }
@@ -287,7 +298,7 @@ class ProductController extends FrameworkBundleAdminController
         $products = $request->attributes->get('products', null); // get from action subcall data, if any
         $lastSql = $request->attributes->get('last_sql', null); // get from action subcall data, if any
 
-        if ($products === null) {
+        if (null === $products) {
             // get old values from persistence (before the current update)
             $persistedFilterParameters = $productProvider->getPersistedFilterParameters();
             /** @var ListParametersUpdater $listParametersUpdater */
@@ -331,8 +342,8 @@ class ProductController extends FrameworkBundleAdminController
             $product['url_v2'] = $this->generateUrl('admin_products_v2_edit', ['productId' => $product['id_product']]);
         }
 
-        //Drag and drop is ONLY activated when EXPLICITLY requested by the user
-        //Meaning a category is selected and the user clicks on REORDER button
+        // Drag and drop is ONLY activated when EXPLICITLY requested by the user
+        // Meaning a category is selected and the user clicks on REORDER button
         $activateDragAndDrop = 'position_ordering' === $orderBy && $hasCategoryFilter;
 
         // Template vars injection
@@ -345,7 +356,7 @@ class ProductController extends FrameworkBundleAdminController
             'is_shop_context' => $this->get('prestashop.adapter.shop.context')->isShopContext(),
             'productPageV2IsEnabled' => $this->isProductPageV2Enabled(),
         ];
-        if ($view !== 'full') {
+        if ('full' !== $view) {
             return $this->render(
                 '@Product/CatalogPage/Lists/list_' . $view . '.html.twig',
                 array_merge(
@@ -414,7 +425,7 @@ class ProductController extends FrameworkBundleAdminController
         $productAdapter = $this->get('prestashop.adapter.data_provider.product');
         $productShopCategory = $this->getContext()->shop->id_category;
 
-        /** @var Product $product */
+        /** @var \Product $product */
         $product = $productAdapter->getProductInstance();
         $product->id_category_default = $productShopCategory;
 
@@ -422,9 +433,9 @@ class ProductController extends FrameworkBundleAdminController
         $taxRuleDataProvider = $this->get('prestashop.adapter.data_provider.tax');
         $product->id_tax_rules_group = $taxRuleDataProvider->getIdTaxRulesGroupMostUsed();
         $product->active = $productProvider->isNewProductDefaultActivated();
-        $product->state = Product::STATE_TEMP;
+        $product->state = \Product::STATE_TEMP;
 
-        //set name and link_rewrite in each lang
+        // set name and link_rewrite in each lang
         foreach ($languages as $lang) {
             $product->name[$lang['id_lang']] = '';
             $product->link_rewrite[$lang['id_lang']] = '';
@@ -465,7 +476,7 @@ class ProductController extends FrameworkBundleAdminController
 
         $shopContext = $this->get('prestashop.adapter.shop.context');
         $legacyContextService = $this->get('prestashop.adapter.legacy.context');
-        $isMultiShopContext = count($shopContext->getContextListShopID()) > 1;
+        $isMultiShopContext = 1 < count($shopContext->getContextListShopID());
 
         $modelMapper = $this->get('prestashop.adapter.admin.model.product');
         $adminProductWrapper = $this->get('prestashop.adapter.admin.wrapper.product');
@@ -521,10 +532,10 @@ class ProductController extends FrameworkBundleAdminController
                 }
 
                 if ($form->isValid()) {
-                    //define POST values for keeping legacy adminController skills
+                    // define POST values for keeping legacy adminController skills
                     $_POST = $modelMapper->getModelData($formData, $isMultiShopContext) + $_POST;
                     $_POST['form'] = $formData;
-                    $_POST['state'] = Product::STATE_SAVED;
+                    $_POST['state'] = \Product::STATE_SAVED;
 
                     $adminProductController = $adminProductWrapper->getInstance();
                     $adminProductController->setIdObject($formData['id_product']);
@@ -549,31 +560,32 @@ class ProductController extends FrameworkBundleAdminController
                     $adminProductController->processSuppliers($product->id);
                     $adminProductController->processFeatures($product->id);
                     $adminProductController->processSpecificPricePriorities();
-                    foreach ($_POST['combinations'] as $combinationValues) {
+                    foreach (\Tools::getValue('combinations') as $combinationValues) {
                         $adminProductWrapper->processProductAttribute($product, $combinationValues);
                         // For now, each attribute set the same value.
                         $adminProductWrapper->processDependsOnStock(
                             $product,
-                            ($_POST['depends_on_stock'] == '1'),
+                            '1' == \Tools::getValue('depends_on_stock'),
                             $combinationValues['id_product_attribute']
                         );
                     }
-                    $adminProductWrapper->processDependsOnStock($product, ($_POST['depends_on_stock'] == '1'));
+                    $adminProductWrapper->processDependsOnStock($product, '1' == \Tools::getValue('depends_on_stock'));
 
                     // If there is no combination, then quantity and location are managed for the whole product (as combination ID 0)
                     // In all cases, legacy hooks are triggered: actionProductUpdate and actionUpdateQuantity
-                    if (count($_POST['combinations']) === 0 && isset($_POST['qty_0'])) {
-                        $adminProductWrapper->processQuantityUpdate($product, $_POST['qty_0']);
-                        $adminProductWrapper->processLocation($product, (string) $_POST['location']);
+                    if (0 === count(\Tools::getValue('combinations')) && isset(\Tools::getValue()['qty_0'])) {
+                        $adminProductWrapper->processQuantityUpdate($product, \Tools::getValue()['qty_0']);
+                        $adminProductWrapper->processLocation($product, (string) \Tools::getValue('location'));
                     }
                     // else quantities are managed from $adminProductWrapper->processProductAttribute() above.
 
-                    $adminProductWrapper->processProductOutOfStock($product, $_POST['out_of_stock']);
+                    $adminProductWrapper->processProductOutOfStock($product, \Tools::getValue('out_of_stock'));
 
                     $customizationFieldsIds = $adminProductWrapper
-                        ->processProductCustomization($product, $_POST['custom_fields']);
+                        ->processProductCustomization($product, \Tools::getValue('custom_fields'))
+                    ;
 
-                    $adminProductWrapper->processAttachments($product, $_POST['attachments']);
+                    $adminProductWrapper->processAttachments($product, \Tools::getValue('attachments'));
 
                     $adminProductController->processWarehouses();
 
@@ -593,7 +605,7 @@ class ProductController extends FrameworkBundleAdminController
                     );
                 }
             }
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             // this controller can be called as an AJAX JSON route or a HTML page
             // so we need to return the right type of response if an exception it thrown
             if ($request->isXmlHttpRequest()) {
@@ -612,7 +624,7 @@ class ProductController extends FrameworkBundleAdminController
         /** @var WarehouseDataProvider $warehouseProvider */
         $warehouseProvider = $this->get('prestashop.adapter.data_provider.warehouse');
 
-        //If context shop is define to a group shop, disable the form
+        // If context shop is define to a group shop, disable the form
         if ($shopContext->isGroupShopContext()) {
             return $this->render('@Product/ProductPage/disabled_form_alert.html.twig', ['showContentHeader' => false]);
         }
@@ -638,7 +650,8 @@ class ProductController extends FrameworkBundleAdminController
         $drawerModules = (new HookFinder())->setHookName('displayProductPageDrawer')
             ->setParams(['product' => $product])
             ->addExpectedInstanceClasses('PrestaShop\PrestaShop\Core\Product\ProductAdminDrawer')
-            ->present();
+            ->present()
+        ;
 
         return [
             'form' => $form->createView(),
@@ -646,7 +659,7 @@ class ProductController extends FrameworkBundleAdminController
             'categories' => $this->get('prestashop.adapter.data_provider.category')->getCategoriesWithBreadCrumb(),
             'id_product' => $id,
             'ids_product_attribute' => (isset($formData['step3']['id_product_attributes']) ? implode(',', $formData['step3']['id_product_attributes']) : ''),
-            'has_combinations' => (isset($formData['step3']['id_product_attributes']) && count($formData['step3']['id_product_attributes']) > 0),
+            'has_combinations' => (isset($formData['step3']['id_product_attributes']) && 0 < count($formData['step3']['id_product_attributes'])),
             'combinations_count' => isset($formData['step3']['id_product_attributes']) ? count($formData['step3']['id_product_attributes']) : 0,
             'asm_globally_activated' => $stockManager->isAsmGloballyActivated(),
             'warehouses' => ($stockManager->isAsmGloballyActivated()) ? $warehouseProvider->getWarehouses() : [],
@@ -661,28 +674,28 @@ class ProductController extends FrameworkBundleAdminController
             'languages' => $languages,
             'default_language_iso' => $languages[0]['iso_code'],
             'attribute_groups' => $attributeGroups,
-            'max_upload_size' => Tools::formatBytes(UploadedFile::getMaxFilesize()),
+            'max_upload_size' => \Tools::formatBytes(UploadedFile::getMaxFilesize()),
             'is_shop_context' => $this->get('prestashop.adapter.shop.context')->isShopContext(),
             'editable' => $this->isGranted(PageVoter::UPDATE, self::PRODUCT_OBJECT),
             'drawerModules' => $drawerModules,
             'layoutTitle' => $this->trans('Product', 'Admin.Global'),
-            'isProductPageV2Enabled' => ($this->isProductPageV2Enabled()),
-            'isCreationMode' => (int) $product->state === Product::STATE_TEMP,
-            'frActivation' => (bool)Configuration::get('FR_ACTIVATION')
+            'isProductPageV2Enabled' => $this->isProductPageV2Enabled(),
+            'isCreationMode' => \Product::STATE_TEMP === (int) $product->state,
+            'frActivation' => (bool) \Configuration::get('FR_ACTIVATION'),
         ];
     }
 
     /**
      * Builds the product form.
      *
-     * @param Product $product
+     * @param \Product $product
      * @param AdminModelAdapter $modelMapper
      *
      * @return FormInterface
      *
      * @throws \Symfony\Component\Process\Exception\LogicException
      */
-    private function createProductForm(Product $product, AdminModelAdapter $modelMapper)
+    private function createProductForm(\Product $product, AdminModelAdapter $modelMapper)
     {
         $formBuilder = $this->createFormBuilder(
             $modelMapper->getFormData($product),
@@ -696,7 +709,8 @@ class ProductController extends FrameworkBundleAdminController
             ->add('step5', ProductSeo::class, [
                 'mapping_type' => $product->getRedirectType(),
             ])
-            ->add('step6', ProductOptions::class);
+            ->add('step6', ProductOptions::class)
+        ;
 
         // Prepare combination form (fake but just to validate the form)
         $combinations = $product->getAttributesResume(
@@ -737,9 +751,9 @@ class ProductController extends FrameworkBundleAdminController
      * @param Request $request
      * @param string $action The action to apply on the selected products
      *
-     * @throws Exception if action not properly set or unknown
-     *
      * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \Exception if action not properly set or unknown
      */
     public function bulkAction(Request $request, $action)
     {
@@ -891,10 +905,10 @@ class ProductController extends FrameworkBundleAdminController
                      */
                     $logger->error('Bulk action from ProductController received a bad parameter.', $this->getLogDataContext());
 
-                    throw new Exception('Bad action received from call to ProductController::bulkAction: "' . $action . '"', 2001);
+                    throw new \Exception('Bad action received from call to ProductController::bulkAction: "' . $action . '"', 2001);
             }
         } catch (UpdateProductException $due) {
-            //TODO : need to translate this with an domain name
+            // TODO : need to translate this with an domain name
             $message = $due->getMessage();
             $this->addFlash('failure', $message);
             $logger->warning($message, $this->getLogDataContext());
@@ -910,9 +924,9 @@ class ProductController extends FrameworkBundleAdminController
      * @param Request $request
      * @param string $action The action to apply on the selected products
      *
-     * @throws Exception if action not properly set or unknown
-     *
      * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \Exception if action not properly set or unknown
      */
     public function massEditAction(Request $request, $action)
     {
@@ -977,7 +991,8 @@ class ProductController extends FrameworkBundleAdminController
                     );
                     $logger->info(
                         'Products sorted: (' . implode(',', $productIdList) .
-                        ') with positions (' . implode(',', $productPositionList) . ').', $this->getLogDataContext()
+                        ') with positions (' . implode(',', $productPositionList) . ').',
+                        $this->getLogDataContext()
                     );
                     $hookEventParameters = [
                         'product_list_id' => $productIdList,
@@ -1000,10 +1015,10 @@ class ProductController extends FrameworkBundleAdminController
                      */
                     $logger->error('Mass edit action from ProductController received a bad parameter.', $this->getLogDataContext());
 
-                    throw new Exception('Bad action received from call to ProductController::massEditAction: "' . $action . '"', 2001);
+                    throw new \Exception('Bad action received from call to ProductController::massEditAction: "' . $action . '"', 2001);
             }
         } catch (UpdateProductException $due) {
-            //TODO : need to translate with domain name
+            // TODO : need to translate with domain name
             $message = $due->getMessage();
             $this->addFlash('failure', $message);
             $logger->warning($message, $this->getLogDataContext());
@@ -1020,9 +1035,9 @@ class ProductController extends FrameworkBundleAdminController
      * @param string $action The action to apply on the selected product
      * @param int $id the product ID to apply the action on
      *
-     * @throws Exception if action not properly set or unknown
-     *
      * @return \Symfony\Component\HttpFoundation\Response
+     *
+     * @throws \Exception if action not properly set or unknown
      */
     public function unitAction($action, $id)
     {
@@ -1098,6 +1113,7 @@ class ProductController extends FrameworkBundleAdminController
                         'actionAdminProductsControllerDuplicateAfter',
                         $hookEventParameters
                     );
+
                     // stops here and redirect to the new product's page.
                     return $this->redirectToRoute('admin_product_form', ['id' => $duplicateProductId]);
                 case 'activate':
@@ -1159,10 +1175,10 @@ class ProductController extends FrameworkBundleAdminController
                      */
                     $logger->error('Unit action from ProductController received a bad parameter.', $this->getLogDataContext($id));
 
-                    throw new Exception('Bad action received from call to ProductController::unitAction: "' . $action . '"', 2002);
+                    throw new \Exception('Bad action received from call to ProductController::unitAction: "' . $action . '"', 2002);
             }
         } catch (UpdateProductException $due) {
-            //TODO : need to translate with a domain name
+            // TODO : need to translate with a domain name
             $message = $due->getMessage();
             $this->addFlash('failure', $message);
             $logger->warning($message, $this->getLogDataContext($id));
@@ -1242,8 +1258,8 @@ class ProductController extends FrameworkBundleAdminController
             array_merge(
                 AdminFilter::getProductCatalogEmptyFilter(),
                 [
-                    'filter_column_sav_quantity' => ($quantity == 'none') ? '' : $quantity,
-                    'filter_column_active' => ($active == 'none') ? '' : $active,
+                    'filter_column_sav_quantity' => ('none' == $quantity) ? '' : $quantity,
+                    'filter_column_active' => ('none' == $active) ? '' : $active,
                 ]
             )
         );
