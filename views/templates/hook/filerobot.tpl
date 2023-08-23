@@ -23,9 +23,9 @@
 *}
 
 <link rel="stylesheet" type="text/css"
-      href="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.105/filerobot-widget.min.css?func=proxy"/>
+      href="https://scaleflex.cloudimg.io/v7/plugins/filerobot-widget/stable/filerobot-widget.min.css"/>
 <script type="text/javascript"
-        src="https://cdn.scaleflex.it/plugins/filerobot-widget/1.0.105/filerobot-widget.min.js?func=proxy"></script>
+        src="https://scaleflex.cloudimg.io/v7/plugins/filerobot-widget/stable/filerobot-widget.min.js?func=proxy"></script>
 
 
 <button type="button" class="btn btn-primary" style="display: none" id="filerobot-modal-btn" data-toggle="modal"
@@ -58,7 +58,7 @@
             $('#filerobot-modal-btn').trigger('click');
         });
 
-
+        console.log('ahiahaihaihih');
         const container = '{$frToken|escape:'htmlall':'UTF-8'}';
         const templateId = '{$frSecTemplate|escape:'htmlall':'UTF-8'}';
         const uploadDir = '{$frUploadDir|escape:'htmlall':'UTF-8'}';
@@ -73,8 +73,7 @@
 
             const Explorer = Filerobot.Explorer;
             const XHRUpload = Filerobot.XHRUpload;
-            const ImageEditor = Filerobot.ImageEditor;
-            const Webcam = Filerobot.Webcam;
+
             window.filerobot = filerobot;
             filerobot
                 .use(Explorer, {
@@ -83,22 +82,22 @@
                     },
                     target: '#filerobot-widget',
                     inline: true,
-                    width: '100%',
+                    width: '99%',
                     height: 530,
-                    showDetailsView: true,
+                    disableExportButton: false,
+                    hideExportButtonIcon: true,
+                    preventExportDefaultBehavior: true,
+                    resetAfterClose: true,
+                    dismissUrlPathQueryUpdate: true,
                     locale: {
                         strings: {
-                            export: 'Insert'
+                            mutualizedExportButtonLabel: 'Insert',
+                            mutualizedDownloadButton: 'Insert',
                         }
                     },
                 })
                 .use(XHRUpload)
-                .use(ImageEditor, {
-                    cloudimageToken: templateId
-                })
-                .use(Webcam)
                 .on('export', function (files, popupExportSuccessMsgFn, downloadFilesPackagedFn, downloadFileFn) {
-
                     const uploadUrl = jQuery('#product-images-dropzone').attr('url-upload');
 
                     files.forEach((selected, key) => {
