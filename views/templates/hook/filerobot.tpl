@@ -23,9 +23,9 @@
 *}
 
 <link rel="stylesheet" type="text/css"
-      href="https://scaleflex.cloudimg.io/v7/plugins/filerobot-widget/stable/filerobot-widget.min.css"/>
+      href="https://scaleflex.cloudimg.io/v7/plugins/filerobot-widget/v3/3.8.8/filerobot-widget.min.css"/>
 <script type="text/javascript"
-        src="https://scaleflex.cloudimg.io/v7/plugins/filerobot-widget/stable/filerobot-widget.min.js?func=proxy"></script>
+        src="https://scaleflex.cloudimg.io/v7/plugins/filerobot-widget/v3/3.8.8/filerobot-widget.min.js"></script>
 
 
 <button type="button" class="btn btn-primary" style="display: none" id="filerobot-modal-btn" data-toggle="modal"
@@ -82,11 +82,11 @@
                     },
                     target: '#filerobot-widget',
                     inline: true,
-                    width: '99%',
-                    height: 530,
-                    disableExportButton: false,
-                    hideExportButtonIcon: true,
-                    preventExportDefaultBehavior: true,
+                    width: "100%",
+                    height: "100%",
+                    disableDownloadButton: false,
+                    hideDownloadButtonIcon: true,
+                    preventDownloadDefaultBehavior: true,
                     resetAfterClose: true,
                     dismissUrlPathQueryUpdate: true,
                     locale: {
@@ -170,6 +170,9 @@
 </script>
 
 <style>
+    button.filerobot-u-reset {
+        top: 0px !important;
+    }
     .product-page #product-images-dropzone.dropzone .dz-preview.filerobotmanager div {
         position: relative;
         top: 50%;
