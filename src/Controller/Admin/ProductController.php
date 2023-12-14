@@ -40,20 +40,26 @@ namespace Scaleflex\PrestashopFilerobot\Controller\Admin;
 
 use Category;
 use Exception;
+use LogicException;
+use PrestaShop\PrestaShop\Adapter\Product\AdminProductWrapper;
 use PrestaShop\PrestaShop\Adapter\Product\ListParametersUpdater;
 use PrestaShop\PrestaShop\Adapter\Tax\TaxRuleDataProvider;
+use PrestaShop\PrestaShop\Adapter\Product\FilterCategoriesRequestPurifier;
 use PrestaShop\PrestaShop\Adapter\Warehouse\WarehouseDataProvider;
-use PrestaShop\PrestaShop\Core\Domain\Product\Command\UpdateProductStatusCommand;
+use PrestaShop\PrestaShop\Core\Domain\Product\Command\UpdateProductCommand;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\CannotUpdateProductException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductException;
 use PrestaShop\PrestaShop\Core\Domain\Product\Exception\ProductNotFoundException;
-use PrestaShop\PrestaShop\Core\Domain\Product\Query\GetProductIsEnabled;
+use PrestaShop\PrestaShop\Core\Domain\Product\Query\GetProductForEditing;
+use PrestaShop\PrestaShop\Core\Domain\Product\QueryResult\ProductForEditing;
 use PrestaShop\PrestaShop\Core\FeatureFlag\FeatureFlagSettings;
 use PrestaShop\PrestaShop\Core\Hook\HookDispatcher;
 use PrestaShopBundle\Component\CsvResponse;
 use PrestaShopBundle\Controller\Admin\FrameworkBundleAdminController;
 use PrestaShopBundle\Entity\AdminFilter;
+use PrestaShopBundle\Entity\Attribute;
 use PrestaShopBundle\Entity\Repository\AttributeRepository;
+use PrestaShopBundle\Entity\Repository\FeatureFlagRepository;
 use PrestaShopBundle\Exception\UpdateProductException;
 use PrestaShopBundle\Form\Admin\Product\ProductCategories;
 use PrestaShopBundle\Form\Admin\Product\ProductCombination;
@@ -82,6 +88,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Tools as LegacyTools;
 
 /**
  * Admin controller for the Product pages using the Symfony architecture:
@@ -138,10 +145,14 @@ class ProductController extends FrameworkBundleAdminController
         if (!$this->isGranted([PageVoter::READ, PageVoter::UPDATE, PageVoter::CREATE], self::PRODUCT_OBJECT)) {
             return $this->redirect('admin_dashboard');
         }
+        
+        if ($this->shouldRedirectToV2()) {
+            return $this->redirectToRoute('admin_products_index');
+        }
 
         $language = $this->getContext()->language;
         $request->getSession()->set('_locale', $language->locale);
-        $request = $this->get('prestashop.adapter.product.filter_categories_request_purifier')->purify($request);
+        $request = $this->get(FilterCategoriesRequestPurifier::class)->purify($request);
 
         /** @var ProductInterfaceProvider $productProvider */
         $productProvider = $this->get('prestashop.core.admin.data_provider.product_interface');
@@ -149,7 +160,7 @@ class ProductController extends FrameworkBundleAdminController
         // Set values from persistence and replace in the request
         $persistedFilterParameters = $productProvider->getPersistedFilterParameters();
         /** @var ListParametersUpdater $listParametersUpdater */
-        $listParametersUpdater = $this->get('prestashop.adapter.product.list_parameters_updater');
+        $listParametersUpdater = $this->get(ListParametersUpdater::class);
         $listParameters = $listParametersUpdater->buildListParameters(
             $request->query->all(),
             $persistedFilterParameters,
@@ -226,7 +237,6 @@ class ProductController extends FrameworkBundleAdminController
         // Drag and drop is ONLY activated when EXPLICITLY requested by the user
         // Meaning a category is selected and the user clicks on REORDER button
         $activateDragAndDrop = 'position_ordering' === $orderBy && $hasCategoryFilter;
-
         // Template vars injection
         return array_merge(
             $cleanFilterParameters,
@@ -284,13 +294,13 @@ class ProductController extends FrameworkBundleAdminController
         $sortOrder = 'asc',
         $view = 'full'
     ) {
-        if (!$this->isGranted([PageVoter::READ], self::PRODUCT_OBJECT)) {
+        if (!$this->isGranted(PageVoter::READ, self::PRODUCT_OBJECT)) {
             return $this->redirect('admin_dashboard');
         }
 
         /** @var ProductInterfaceProvider $productProvider */
         $productProvider = $this->get('prestashop.core.admin.data_provider.product_interface');
-        $adminProductWrapper = $this->get('prestashop.adapter.admin.wrapper.product');
+        $adminProductWrapper = $this->get(AdminProductWrapper::class);
         $totalCount = 0;
 
         $this->get('prestashop.service.product')->cleanupOldTempProducts();
@@ -302,7 +312,7 @@ class ProductController extends FrameworkBundleAdminController
             // get old values from persistence (before the current update)
             $persistedFilterParameters = $productProvider->getPersistedFilterParameters();
             /** @var ListParametersUpdater $listParametersUpdater */
-            $listParametersUpdater = $this->get('prestashop.adapter.product.list_parameters_updater');
+            $listParametersUpdater = $this->get(ListParametersUpdater::class);
             $listParameters = $listParametersUpdater->buildListParameters(
                 $request->query->all(),
                 $persistedFilterParameters,
@@ -339,7 +349,7 @@ class ProductController extends FrameworkBundleAdminController
                 ]
             );
             $product['preview_url'] = $adminProductWrapper->getPreviewUrlFromId($product['id_product']);
-            $product['url_v2'] = $this->generateUrl('admin_products_v2_edit', ['productId' => $product['id_product']]);
+            $product['url_v2'] = $this->generateUrl('admin_products_edit', ['productId' => $product['id_product']]);
         }
 
         // Drag and drop is ONLY activated when EXPLICITLY requested by the user
@@ -354,7 +364,7 @@ class ProductController extends FrameworkBundleAdminController
             'last_sql_query' => $lastSql,
             'has_category_filter' => $productProvider->isCategoryFiltered(),
             'is_shop_context' => $this->get('prestashop.adapter.shop.context')->isShopContext(),
-            'productPageV2IsEnabled' => $this->isProductPageV2Enabled(),
+            'productPageV2IsEnabled' => $this->shouldRedirectToV2(),
         ];
         if ('full' !== $view) {
             return $this->render(
@@ -388,14 +398,15 @@ class ProductController extends FrameworkBundleAdminController
             'help' => $this->trans('Create a new product: CTRL+P', 'Admin.Catalog.Help'),
         ];
 
-        if ($this->isProductPageV2Enabled()) {
+        if ($this->shouldRedirectToV2()) {
             $toolbarButtons['add_v2'] = [
-                'href' => $this->generateUrl('admin_products_v2_create'),
+                'href' => $this->generateUrl('admin_products_create'),
                 'desc' => $this->trans('New product on experimental page', 'Admin.Catalog.Feature'),
                 'icon' => 'add_circle_outline',
                 'class' => 'btn-outline-primary',
             ];
         }
+
 
         return $toolbarButtons;
     }
@@ -463,12 +474,18 @@ class ProductController extends FrameworkBundleAdminController
     {
         gc_disable();
 
-        if (!$this->isGranted([PageVoter::READ, PageVoter::UPDATE, PageVoter::CREATE], self::PRODUCT_OBJECT)) {
-            return $this->redirect('admin_dashboard');
+        foreach ([PageVoter::READ, PageVoter::UPDATE, PageVoter::CREATE] as $permission) {
+            if (!$this->isGranted($permission, self::PRODUCT_OBJECT)) {
+                return $this->redirect('admin_dashboard');
+            }
         }
 
         $productAdapter = $this->get('prestashop.adapter.data_provider.product');
-        $product = $productAdapter->getProduct($id);
+        try {
+            $product = $productAdapter->getProduct($id);
+        } catch (LogicException $e) {
+            $product = null;
+        }
 
         if (!$product || empty($product->id)) {
             return $this->redirectToRoute('admin_product_catalog');
@@ -479,7 +496,7 @@ class ProductController extends FrameworkBundleAdminController
         $isMultiShopContext = 1 < count($shopContext->getContextListShopID());
 
         $modelMapper = $this->get('prestashop.adapter.admin.model.product');
-        $adminProductWrapper = $this->get('prestashop.adapter.admin.wrapper.product');
+        $adminProductWrapper = $this->get(AdminProductWrapper::class);
 
         $form = $this->createProductForm($product, $modelMapper);
 
@@ -560,32 +577,31 @@ class ProductController extends FrameworkBundleAdminController
                     $adminProductController->processSuppliers($product->id);
                     $adminProductController->processFeatures($product->id);
                     $adminProductController->processSpecificPricePriorities();
-                    foreach (\Tools::getValue('combinations') as $combinationValues) {
+                    foreach ($_POST['combinations'] as $combinationValues) {
                         $adminProductWrapper->processProductAttribute($product, $combinationValues);
                         // For now, each attribute set the same value.
                         $adminProductWrapper->processDependsOnStock(
                             $product,
-                            '1' == \Tools::getValue('depends_on_stock'),
+                            ($_POST['depends_on_stock'] == '1'),
                             $combinationValues['id_product_attribute']
                         );
                     }
-                    $adminProductWrapper->processDependsOnStock($product, '1' == \Tools::getValue('depends_on_stock'));
+                    $adminProductWrapper->processDependsOnStock($product, ($_POST['depends_on_stock'] == '1'));
 
                     // If there is no combination, then quantity and location are managed for the whole product (as combination ID 0)
                     // In all cases, legacy hooks are triggered: actionProductUpdate and actionUpdateQuantity
-                    if (0 === count(\Tools::getValue('combinations')) && isset(\Tools::getValue()['qty_0'])) {
-                        $adminProductWrapper->processQuantityUpdate($product, \Tools::getValue()['qty_0']);
-                        $adminProductWrapper->processLocation($product, (string) \Tools::getValue('location'));
+                    if (count($_POST['combinations']) === 0 && isset($_POST['qty_0'])) {
+                        $adminProductWrapper->processQuantityUpdate($product, $_POST['qty_0']);
+                        $adminProductWrapper->processLocation($product, (string) $_POST['location']);
                     }
                     // else quantities are managed from $adminProductWrapper->processProductAttribute() above.
 
-                    $adminProductWrapper->processProductOutOfStock($product, \Tools::getValue('out_of_stock'));
+                    $adminProductWrapper->processProductOutOfStock($product, $_POST['out_of_stock']);
 
                     $customizationFieldsIds = $adminProductWrapper
-                        ->processProductCustomization($product, \Tools::getValue('custom_fields'))
-                    ;
+                        ->processProductCustomization($product, $_POST['custom_fields']);
 
-                    $adminProductWrapper->processAttachments($product, \Tools::getValue('attachments'));
+                    $adminProductWrapper->processAttachments($product, $_POST['attachments']);
 
                     $adminProductController->processWarehouses();
 
@@ -605,9 +621,9 @@ class ProductController extends FrameworkBundleAdminController
                     );
                 }
             }
-        } catch (\Exception $e) {
-            // this controller can be called as an AJAX JSON route or a HTML page
-            // so we need to return the right type of response if an exception it thrown
+        } catch (Exception $e) {
+            // this controller can be called as an AJAX JSON route or an HTML page
+            // so we need to return the right type of response if an exception is thrown
             if ($request->isXmlHttpRequest()) {
                 return $this->returnErrorJsonResponse(
                     [],
@@ -644,7 +660,7 @@ class ProductController extends FrameworkBundleAdminController
         $doctrine = $this->getDoctrine()->getManager();
         $language = empty($languages[0]) ? ['id_lang' => 1, 'id_shop' => 1] : $languages[0];
         /** @var AttributeRepository $attributeRepository */
-        $attributeRepository = $doctrine->getRepository('PrestaShopBundle:Attribute');
+        $attributeRepository = $doctrine->getRepository(Attribute::class);
         $attributeGroups = $attributeRepository->findByLangAndShop((int) $language['id_lang'], (int) $language['id_shop']);
 
         $drawerModules = (new HookFinder())->setHookName('displayProductPageDrawer')
@@ -674,12 +690,12 @@ class ProductController extends FrameworkBundleAdminController
             'languages' => $languages,
             'default_language_iso' => $languages[0]['iso_code'],
             'attribute_groups' => $attributeGroups,
-            'max_upload_size' => \Tools::formatBytes(UploadedFile::getMaxFilesize()),
+            'max_upload_size' => LegacyTools::formatBytes(UploadedFile::getMaxFilesize()),
             'is_shop_context' => $this->get('prestashop.adapter.shop.context')->isShopContext(),
             'editable' => $this->isGranted(PageVoter::UPDATE, self::PRODUCT_OBJECT),
             'drawerModules' => $drawerModules,
             'layoutTitle' => $this->trans('Product', 'Admin.Global'),
-            'isProductPageV2Enabled' => $this->isProductPageV2Enabled(),
+            'shouldRedirectToV2' => $this->shouldRedirectToV2(),
             'isCreationMode' => \Product::STATE_TEMP === (int) $product->state,
             'frActivation' => (bool) \Configuration::get('FR_ACTIVATION'),
         ];
@@ -1199,7 +1215,7 @@ class ProductController extends FrameworkBundleAdminController
      *
      * @return JsonResponse
      */
-    public function toggleStatusAction($productId)
+    public function toggleStatusAction(Request $request, $productId)
     {
         if ($this->isDemoModeEnabled()) {
             return $this->json([
@@ -1208,10 +1224,18 @@ class ProductController extends FrameworkBundleAdminController
             ]);
         }
 
-        try {
-            $isEnabled = $this->getQueryBus()->handle(new GetProductIsEnabled($productId));
+        $shopConstraint = $request->attributes->get('shopConstraint');
+        /** @var ProductForEditing $productForEditing */
+        $productForEditing = $this->getQueryBus()->handle(new GetProductForEditing(
+            $productId,
+            $shopConstraint,
+            $this->getContextLangId()
+        ));
 
-            $this->getCommandBus()->handle(new UpdateProductStatusCommand($productId, !$isEnabled));
+        try {
+            $command = new UpdateProductCommand($productId, $request->attributes->get('shopConstraint'));
+            $command->setActive(!$productForEditing->isActive());
+            $this->getCommandBus()->handle($command);
             $response = [
                 'status' => true,
                 'message' => $this->trans('The status has been successfully updated.', 'Admin.Notifications.Success'),
@@ -1356,17 +1380,11 @@ class ProductController extends FrameworkBundleAdminController
         ];
     }
 
-    /**
+     /**
      * @return bool
      */
-    private function isProductPageV2Enabled(): bool
+    private function shouldRedirectToV2(): bool
     {
-        $productPageV2FeatureFlag = $this->get('prestashop.core.feature_flags.modifier')->getOneFeatureFlagByName(FeatureFlagSettings::FEATURE_FLAG_PRODUCT_PAGE_V2);
-
-        if (null === $productPageV2FeatureFlag) {
-            return false;
-        }
-
-        return $productPageV2FeatureFlag->isEnabled();
+        return $this->get(FeatureFlagRepository::class)->isEnabled(FeatureFlagSettings::FEATURE_FLAG_PRODUCT_PAGE_V2);
     }
 }

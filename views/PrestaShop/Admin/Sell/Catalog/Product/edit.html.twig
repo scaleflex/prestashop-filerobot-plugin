@@ -1,0 +1,86 @@
+{# **
+* Copyright since 2022 Scaleflex
+*
+* NOTICE OF LICENSE
+*
+* This file is licenced under the Software License Agreement.
+* With the purchase or the installation of the software in your application
+* If you accept the licence agreement.
+*
+* @author    Scaleflex
+* @copyright Since 2022 Scaleflex
+* @license   LICENSE.txt
+* #}
+{% extends '@PrestaShop/Admin/layout.html.twig' %}
+
+{% block stylesheets %}
+  {{ parent() }}
+  <link rel="stylesheet" href="{{ asset('themes/new-theme/public/product' ~ rtl_suffix ~ '.css') }}" type="text/css" media="all">
+{% endblock %}
+
+{# We empty the parent content header block because session alert is gonna be displayed inside the content #}
+{% block content_header %}
+{% endblock %}
+
+{% block content %}
+<div class="product-page-v2">
+  {% set productType = productForm.vars.product_type %}
+  {% set productId = productForm.vars.product_id %}
+  {% set shopId = productForm.vars.shop_id %}
+
+  <div class="header-toolbar d-print-none">
+    {{ multistoreProductHeader(productId) }}
+  </div>
+
+  {{ form_start(productForm, {'attr': {
+    'class': 'form-horizontal product-page justify-content-md-center product-form',
+    'novalidate': 'novalidate',
+    'data-product-id': productId,
+    'data-shop-id': shopId,
+    'data-product-type': productType
+  }}) }}
+
+  {# Header form child is rendered separately because it's not one of the tabs so it needs to be rendered before #}
+  {% block product_header %}
+    {{ include('@PrestaShop/Admin/Sell/Catalog/Product/Blocks/header.html.twig', {'productForm': productForm}) }}
+  {% endblock %}
+
+  {# Footer form child is rendered separately because it's not one of the tabs so it needs to be rendered before #}
+  {% block product_footer %}
+    {{ include('@PrestaShop/Admin/Sell/Catalog/Product/Blocks/footer.html.twig', {
+      'productForm': productForm,
+      'editable': editable,
+      'productId': productId,
+    }) }}
+  {% endblock %}
+
+  {{ block('session_alert') }}
+
+  <div id="contextual-notification-box"></div>
+
+  {{ form_widget(productForm) }}
+
+  {% block product_rest %}
+    {{ form_end(productForm) }}
+  {% endblock %}
+
+  {% block category_tree_form %}
+    {{ form_row(categoryTreeSelectorForm) }}
+  {% endblock %}
+  <div id="filerobot-data-pass" url-upload="{{ path('admin_product_image_upload', {'idProduct': productId}) }}"
+      url-position="{{ path('admin_product_image_positions') }}"
+      data-max-size="{{ configuration('PS_LIMIT_UPLOAD_IMAGE_VALUE') }}">
+  </div>
+</div>
+{% endblock %}
+
+
+
+{% block javascripts %}
+  {{ parent() }}
+  
+  <script src="{{ asset('../modules/filerobot/new-theme/public/product_edit.bundle.js') }}"></script>
+  <script src="{{ asset('../modules/filerobot/views/js/tinymce/filerobot.js') }}"></script>
+  <script src="{{ asset('../modules/filerobot/views/js/tinymce/custom-tinymce.js') }}"></script>
+
+{% endblock %}

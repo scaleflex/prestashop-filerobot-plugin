@@ -71,7 +71,7 @@ jQuery(document).ready(function () {
                 toolbar1: 'code,colorpicker,bold,italic,underline,strikethrough,blockquote,link,align,bullist,numlist,table,filerobot,media,formatselect',
             }
         } else {
-            if (countChecked < 1000) { // Prevent loop infinity
+            if (countChecked < 5000) { // Prevent loop infinity
                 setTimeout(checkTinyMCELoaded, 100);
             }
         }

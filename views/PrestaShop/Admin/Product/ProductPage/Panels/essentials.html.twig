@@ -112,12 +112,7 @@
                             <div id="features-content" class="content {{ formFeatures|length == 0 ? 'hide':'' }}">
                                 <h2>{{ 'Features'|trans({}, 'Admin.Catalog.Feature') }}</h2>
                                 {{ form_errors(formFeatures) }}
-                                <div
-                                        class="feature-collection nostyle"
-                                        data-prototype="{% filter escape %}
-                    {{ include('@Product/ProductPage/Forms/form_feature.html.twig', { 'form': formFeatures.vars.prototype }) }}
-                  {% endfilter %}"
-                                >
+                                <div class="feature-collection nostyle" data-prototype="{% apply escape %} {{ include('@Product/ProductPage/Forms/form_feature.html.twig', { 'form': formFeatures.vars.prototype }) }} {% endapply %}">
                                     {% for feature in formFeatures %}
                                         {{ include('@Product/ProductPage/Forms/form_feature.html.twig', { 'form': feature }) }}
                                     {% endfor %}

@@ -9,6 +9,32 @@ services:
     decorates: PrestaShopBundle\Controller\Admin\ProductController
     arguments: [ '@ProductControllerOverride.inner' ]
 
+  PrestaShopBundle\Controller\Admin\Sell\Catalog\Product\ProductController:
+    class: Scaleflex\PrestashopFilerobot\Controller\Admin\Sell\Catalog\Product\ProductController
+    tags:
+        - { name: 'controller.service_arguments' }
+        - { name: 'prestashop.core.controllers' }
+        - { name: 'container.service_subscriber' }
+    arguments:
+        $productRepository: '@PrestaShop\PrestaShop\Adapter\Product\Repository\ProductRepository'
+
+  ProductFormDataProviderOverride:
+    decorates: prestashop.core.form.identifiable_object.data_provider.product_form_data_provider
+    class: Scaleflex\PrestashopFilerobot\Adapter\ProductFormDataProvider
+    arguments:
+      - '@prestashop.core.query_bus'
+      - '@prestashop.adapter.legacy.configuration'
+      - '@=service("prestashop.adapter.legacy.context").getContext().language.id'
+      - '@=service("prestashop.adapter.legacy.configuration").getInt("PS_SHOP_DEFAULT")'
+      - "@=service('prestashop.adapter.shop.context').getContextShopID()"
+
+  PrestaShopBundle\Controller\Admin\Sell\Catalog\Product\ImageController:
+    class: Scaleflex\PrestashopFilerobot\Controller\Admin\Sell\Catalog\Product\ImageController
+    tags:
+        - { name: 'controller.service_arguments' }
+        - { name: 'prestashop.core.controllers' }
+        - { name: 'container.service_subscriber' }
+
   ProductDataProviderOverride:
     class: Scaleflex\PrestashopFilerobot\Adapter\ProductDataProvider
     decorates: prestashop.adapter.data_provider.product
@@ -18,3 +44,33 @@ services:
     class: Scaleflex\PrestashopFilerobot\Adapter\ImageManager
     decorates: prestashop.adapter.image_manager
     arguments: [ '@prestashop.adapter.legacy.context' ]
+
+  ProductImageUpdaterOverride:
+    class: Scaleflex\PrestashopFilerobot\Adapter\ProductImageUpdater
+    decorates: PrestaShop\PrestaShop\Adapter\Product\Image\Update\ProductImageUpdater
+    arguments:
+      - '@PrestaShop\PrestaShop\Adapter\Product\Image\Uploader\ProductImageUploader'
+      - '@PrestaShop\PrestaShop\Core\Grid\Position\PositionUpdateFactoryInterface'
+      - '@prestashop.core.grid.image.position_definition'
+      - '@PrestaShop\PrestaShop\Core\Grid\Position\GridPositionUpdaterInterface'
+      - '@PrestaShop\PrestaShop\Adapter\Product\Image\Repository\ProductImageRepository'
+      
+  DeleteProductImageHandlerOverride:
+    class: Scaleflex\PrestashopFilerobot\Adapter\DeleteProductImageHandler
+    decorates: PrestaShop\PrestaShop\Adapter\Product\Image\CommandHandler\DeleteProductImageHandler
+    arguments: [ '@ProductImageUpdaterOverride' ]
+    tags:
+      - name: tactician.handler
+        command: PrestaShop\PrestaShop\Core\Domain\Product\Image\Command\DeleteProductImageCommand
+
+  UpdateProductImageHandlerOverride:
+    class: Scaleflex\PrestashopFilerobot\Adapter\UpdateProductImageHandler
+    decorates: PrestaShop\PrestaShop\Adapter\Product\Image\CommandHandler\UpdateProductImageHandler
+    arguments:
+      - '@PrestaShop\PrestaShop\Adapter\Product\Image\Repository\ProductImageRepository'
+      - '@ProductImageUpdaterOverride'
+      - '@PrestaShop\PrestaShop\Adapter\Product\Image\Uploader\ProductImageUploader'
+      - '@PrestaShop\PrestaShop\Adapter\Image\ProductImageFileValidator'
+    tags:
+      - name: tactician.handler
+        command: PrestaShop\PrestaShop\Core\Domain\Product\Image\Command\UpdateProductImageCommand

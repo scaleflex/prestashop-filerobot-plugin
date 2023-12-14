@@ -58,7 +58,6 @@
             $('#filerobot-modal-btn').trigger('click');
         });
 
-        console.log('ahiahaihaihih');
         const container = '{$frToken|escape:'htmlall':'UTF-8'}';
         const templateId = '{$frSecTemplate|escape:'htmlall':'UTF-8'}';
         const uploadDir = '{$frUploadDir|escape:'htmlall':'UTF-8'}';
@@ -98,9 +97,9 @@
                 })
                 .use(XHRUpload)
                 .on('export', function (files, popupExportSuccessMsgFn, downloadFilesPackagedFn, downloadFileFn) {
-                    const uploadUrl = jQuery('#product-images-dropzone').attr('url-upload');
-
+                    const uploadUrl = jQuery('#filerobot-data-pass').attr('url-upload');
                     files.forEach((selected, key) => {
+                        
                         let link = selected.link;
 
                         let url = new URL(link);
@@ -118,7 +117,6 @@
                         } else {
                             height = url.searchParams.get("height");
                         }
-
                         if (window.fileRobotActiveEditor) {
                             window.fileRobotActiveEditor.execCommand('mceInsertContent', false, '<div>' +
                                 '<img src="' + link + '" ' +
@@ -128,23 +126,24 @@
                                 '</div>');
                         } else {
                             const lastPreviewItem = $('.dz-preview ').last()
-
                             jQuery.post(uploadUrl, {
                                 'type': 'filerobot',
                                 'link': link
                             }).then(function (response) {
-                                const html = '<div class="dz-preview dz-processing dz-image-preview dz-complete ui-sortable-handle"' +
-                                    'url-delete="' + response.url_delete + '" ' +
-                                    'url-update="' + response.url_update + '" ' +
-                                    'data-id="' + response.id + '" ' +
-                                    '>' +
-                                    '<div class="dz-image bg" style="background-image: url(' + link + ')"></div>' +
-                                    '<div class="dz-details">' +
-                                    '<div class="dz-size"><span data-dz-size=""></span></div>' +
-                                    '<div class="dz-filename"><span data-dz-name=""></span></div>' +
-                                    ' </div>' +
-                                    '</div>';
-                                lastPreviewItem.after(html)
+                                // const html = '<div class="dz-preview dz-processing dz-image-preview dz-complete ui-sortable-handle"' +
+                                //     'url-delete="' + response.url_delete + '" ' +
+                                //     'url-update="' + response.url_update + '" ' +
+                                //     'data-id="' + response.id + '" ' +
+                                //     'data-id-ss="' + response.id + '" ' +
+                                //     '>' +
+                                //     '<div class="dz-image bg" style="background-image: url(' + link + ')"></div>' +
+                                //     '<div class="dz-details">' +
+                                //     '<div class="dz-size"><span data-dz-size=""></span></div>' +
+                                //     '<div class="dz-filename"><span data-dz-name=""></span></div>' +
+                                //     ' </div>' +
+                                //     '</div>';
+                                // lastPreviewItem.after(html)
+                                $(document).trigger("file-robot-upload-url");
                             }).catch(function (error) {
                                 //TODO:: Need todo something
                             });

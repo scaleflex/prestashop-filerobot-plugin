@@ -168,7 +168,7 @@ class FilerobotImageRetriever
         $image_types = \ImageType::getImagesTypes($type, true);
 
         $extPath = $imageFolderPath . DIRECTORY_SEPARATOR . 'fileType';
-        $ext = Tools::file_get_contents($extPath) ?: 'jpg';
+        $ext = \Tools::file_get_contents($extPath) ?: 'jpg';
 
         $mainImagePath = implode(DIRECTORY_SEPARATOR, [
             $imageFolderPath,
