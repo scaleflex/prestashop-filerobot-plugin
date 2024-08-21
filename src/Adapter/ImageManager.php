@@ -43,6 +43,10 @@ use ImageManager as LegacyImageManager;
 use PrestaShop\PrestaShop\Adapter\ImageManager as BaseImageManager;
 use PrestaShop\PrestaShop\Adapter\LegacyContext;
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 class ImageManager extends BaseImageManager
 {
     /**

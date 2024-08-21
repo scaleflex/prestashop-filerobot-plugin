@@ -38,9 +38,14 @@
 
 namespace Scaleflex\PrestashopFilerobot\Adapter;
 
+use Context;
 use Image;
 use Language;
 use Product;
+
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
 
 class FilerobotImageRetriever
 {
@@ -326,7 +331,6 @@ class FilerobotImageRetriever
      * Get product images and legends.
      *
      * @param int $id_lang Language identifier
-     * @param \Context|null $context
      *
      * @return array Product images and legends
      */
@@ -346,11 +350,10 @@ class FilerobotImageRetriever
      * Get product images and legends.
      *
      * @param int $id_lang Language identifier
-     * @param \Context|null $context
      *
      * @return array Product images and legends
      */
-    public function getImages($id_product, $id_lang, \Context $context = null)
+    public function getImages($id_product, $id_lang)
     {
         return \Db::getInstance()->executeS(
             '
@@ -415,12 +418,12 @@ class FilerobotImageRetriever
     /**
      * Get product cover image.
      *
-     * @param int $id_product Product identifier
-     * @param \Context|null $context
+     * @param int $id_product \Product identifier
+     * @param \Context|null $context Context
      *
      * @return array Product cover image
      */
-    public function getCover($id_product, \Context $context = null)
+    public function getCover($id_product, ?\Context $context = null)
     {
         if (!$context) {
             $context = \Context::getContext();

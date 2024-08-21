@@ -41,6 +41,7 @@ if (!defined('_PS_VERSION_')) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 require_once _PS_MODULE_DIR_ . 'filerobot/classes/FilerobotImage.php';
+use Scaleflex\PrestashopFilerobot\Adapter\FilerobotImageRetriever;
 
 class Filerobot extends Module
 {
@@ -116,7 +117,7 @@ class Filerobot extends Module
     private function changeImagesIfFilerobot($presentedProduct)
     {
         if ($presentedProduct->cover) {
-            $imageRetriever = new \Scaleflex\PrestashopFilerobot\Adapter\FilerobotImageRetriever($this->context->link);
+            $imageRetriever = new FilerobotImageRetriever($this->context->link);
             $image = $imageRetriever->getOneImage($presentedProduct->cover['id_image'], $this->context->language->id);
             if (!empty($image) && null !== $image[0]['url']) {
                 $imageCover = $image[0];
@@ -127,7 +128,7 @@ class Filerobot extends Module
 
         if (!empty($presentedProduct->images)) {
             $idProduct = $presentedProduct->id;
-            $imageRetriever = new \Scaleflex\PrestashopFilerobot\Adapter\FilerobotImageRetriever($this->context->link);
+            $imageRetriever = new FilerobotImageRetriever($this->context->link);
             $images = $imageRetriever->getAllProductImages(['id_product' => $idProduct], $this->context->language);
             $presentedProduct->images = $images;
         }

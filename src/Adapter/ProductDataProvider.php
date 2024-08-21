@@ -40,6 +40,10 @@ namespace Scaleflex\PrestashopFilerobot\Adapter;
 
 use PrestaShop\PrestaShop\Adapter\Product\ProductDataProvider as BaseProductDataProvider;
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 /**
  * This class will provide data from DB / ORM about Product, for both Front and Admin interfaces.
  */

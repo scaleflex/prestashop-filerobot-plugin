@@ -43,6 +43,10 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Validator\Constraints as Assert;
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 class ProductImageController extends BaseProductImageController
 {
     public const TYPE_FILEROBOT = 'filerobot';

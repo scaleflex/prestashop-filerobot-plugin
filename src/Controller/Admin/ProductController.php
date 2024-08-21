@@ -83,6 +83,10 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
+if (!defined('_PS_VERSION_')) {
+    exit;
+}
+
 /**
  * Admin controller for the Product pages using the Symfony architecture:
  * - categories
@@ -751,7 +755,7 @@ class ProductController extends FrameworkBundleAdminController
      * @param Request $request
      * @param string $action The action to apply on the selected products
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      *
      * @throws \Exception if action not properly set or unknown
      */
@@ -924,7 +928,7 @@ class ProductController extends FrameworkBundleAdminController
      * @param Request $request
      * @param string $action The action to apply on the selected products
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      *
      * @throws \Exception if action not properly set or unknown
      */
@@ -1035,7 +1039,7 @@ class ProductController extends FrameworkBundleAdminController
      * @param string $action The action to apply on the selected product
      * @param int $id the product ID to apply the action on
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      *
      * @throws \Exception if action not properly set or unknown
      */
