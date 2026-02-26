@@ -7,6 +7,5 @@ $baseDir = dirname($vendorDir);
 
 return array(
     'Composer\\InstalledVersions' => $vendorDir . '/composer/InstalledVersions.php',
-    'Filerobot' => $baseDir . '/filerobot.php',
-    'FilerobotImage' => $baseDir . '/classes/FilerobotImage.php',
+    'ScaleflexDam' => $baseDir . '/scaleflexdam.php',
 );

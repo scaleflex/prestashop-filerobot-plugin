@@ -4,34 +4,33 @@
 
 namespace Composer\Autoload;
 
-class ComposerStaticInitcd17b2c16c5cca8ff5c3387d9f1941c7
+class ComposerStaticInit348510bd420a331df8c89537028a7d27
 {
-    public static $prefixLengthsPsr4 = array(
-        'S' =>
-            array(
-                'Scaleflex\\PrestashopFilerobot\\' => 30,
-            ),
+    public static $prefixLengthsPsr4 = array (
+        'S' => 
+        array (
+            'ScaleflexDam\\' => 13,
+        ),
     );
 
-    public static $prefixDirsPsr4 = array(
-        'Scaleflex\\PrestashopFilerobot\\' =>
-            array(
-                0 => __DIR__ . '/../..' . '/src',
-            ),
+    public static $prefixDirsPsr4 = array (
+        'ScaleflexDam\\' => 
+        array (
+            0 => __DIR__ . '/../..' . '/src',
+        ),
     );
 
-    public static $classMap = array(
+    public static $classMap = array (
         'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
-        'Filerobot' => __DIR__ . '/../..' . '/filerobot.php',
-        'FilerobotImage' => __DIR__ . '/../..' . '/classes/FilerobotImage.php',
+        'ScaleflexDam' => __DIR__ . '/../..' . '/scaleflexdam.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
     {
         return \Closure::bind(function () use ($loader) {
-            $loader->prefixLengthsPsr4 = ComposerStaticInitcd17b2c16c5cca8ff5c3387d9f1941c7::$prefixLengthsPsr4;
-            $loader->prefixDirsPsr4 = ComposerStaticInitcd17b2c16c5cca8ff5c3387d9f1941c7::$prefixDirsPsr4;
-            $loader->classMap = ComposerStaticInitcd17b2c16c5cca8ff5c3387d9f1941c7::$classMap;
+            $loader->prefixLengthsPsr4 = ComposerStaticInit348510bd420a331df8c89537028a7d27::$prefixLengthsPsr4;
+            $loader->prefixDirsPsr4 = ComposerStaticInit348510bd420a331df8c89537028a7d27::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit348510bd420a331df8c89537028a7d27::$classMap;
 
         }, null, ClassLoader::class);
     }

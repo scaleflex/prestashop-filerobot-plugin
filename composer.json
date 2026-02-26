@@ -1,22 +1,21 @@
 {
-  "name": "scaleflex/prestashop-filerobot",
-  "authors": [
-    {
-      "name": "Tung Dang",
-      "email": "tung.dang@scaleflex.com"
-    }
-  ],
-  "autoload": {
-    "psr-4": {
-      "Scaleflex\\PrestashopFilerobot\\": "src/"
+    "name": "scaleflex/prestashop-filerobot",
+    "version": "1.0.2",
+    "description": "Scaleflex DAM normalizes, resizes, optimizes and distributes your images rocket fast around the world.",
+    "type": "prestashop-module",
+    "license": "Egreen License, Version 1.0",
+    "autoload": {
+        "psr-4": {
+            "ScaleflexDam\\": "src/"
+        },
+        "classmap": [
+            "scaleflexdam.php"
+        ]
     },
-    "config": {
-      "prepend-autoloader": false
-    },
-    "classmap": [
-      "filerobot.php",
-      "classes/FilerobotImage.php"
-    ],
-    "type": "prestashop-module"
-  }
+    "authors": [
+        {
+            "name": "Scaleflex",
+            "email": "plugins@scaleflex.com"
+        }
+    ]
 }

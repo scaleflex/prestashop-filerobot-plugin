@@ -6,5 +6,5 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
-    'Scaleflex\\PrestashopFilerobot\\' => array($baseDir . '/src'),
+    'ScaleflexDam\\' => array($baseDir . '/src'),
 );
